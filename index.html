@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HiStream</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #1c1c1c, #333);
+      color: #fff;
+      overflow-x: hidden;
+    }
+    .header {
+      text-align: center;
+      padding: 30px 20px 10px;
+      font-size: 40px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      color: #00ffd5;
+      text-shadow: 0 0 10px #00ffd5;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      z-index: 2;
+      position: relative;
+    }
+    .search-bar {
+      width: 100%;
+      padding: 12px;
+      border-radius: 30px;
+      font-size: 16px;
+      border: none;
+      margin-bottom: 20px;
+      outline: none;
+      box-shadow: 0 0 5px rgba(255,255,255,0.2);
+    }
+    .link-card {
+      background: #222;
+      margin: 15px 0;
+      padding: 15px 20px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      transition: transform 0.2s;
+      box-shadow: 0 0 10px rgba(0,255,213,0.1);
+    }
+    .link-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(0,255,213,0.3);
+    }
+    .link-card img {
+      height: 50px;
+      width: 50px;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+    .link-card a {
+      color: #00ffd5;
+      font-size: 18px;
+      text-decoration: none;
+      flex-grow: 1;
+    }
+    .link-card button {
+      background: none;
+      border: 1px solid #00ffd5;
+      color: #00ffd5;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .add-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #00ffd5;
+      color: #000;
+      font-size: 26px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      box-shadow: 0 0 15px #00ffd5;
+      cursor: pointer;
+      z-index: 999;
+    }
+    .ads, .side-ad {
+      text-align: center;
+      max-width: 600px;
+      margin: auto;
+    }
+    .side-ad {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 120px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .side-ad iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .left-ad {
+      left: 0;
+    }
+    .right-ad {
+      right: 0;
+    }
+    textarea#export {
+      width: 100%;
+      height: 200px;
+      margin-top: 20px;
+      display: none;
+      background: #111;
+      color: #0f0;
+      border: 1px solid #00ffd5;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    @media (max-width: 768px) {
+      .side-ad {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Left and Right Ads -->
+<div class="side-ad left-ad">
+  <iframe src="https://your-left-ad.html"></iframe>
+</div>
+<div class="side-ad right-ad">
+  <iframe src="https://your-right-ad.html"></iframe>
+</div>
+
+<!-- Header -->
+<div class="header">HiStream</div>
+
+<!-- Top Ad -->
+<div class="ads">
+  <iframe src="https://your-top-ad.html" style="width:100%;height:90px;border:none;"></iframe>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+  <input type="text" id="search" class="search-bar" placeholder="Search HiStream...">
+  <div id="linksContainer"></div>
+  <textarea id="export"></textarea>
+</div>
+
+<!-- Bottom Ad -->
+<div class="ads">
+  <iframe src="https://your-bottom-ad.html" style="width:100%;height:90px;border:none;"></iframe>
+</div>
+
+<!-- Add Button -->
+<button class="add-btn" id="addBtn">＋</button>
+
+<!-- All working JS script -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const PASSWORD = "histream123";
+  let isAdmin = false;
+
+  let links = [
+    {
+      "title": "Google",
+      "url": "https://google.com",
+      "img": "https://www.google.com/favicon.ico",
+      "pinned": true
+    },
+    {
+      "title": "YouTube",
+      "url": "https://youtube.com",
+      "img": "https://www.youtube.com/s/desktop/5fdf219e/img/favicon.ico",
+      "pinned": false
+    }
+  ];
+
+  function renderLinks() {
+    const container = document.getElementById('linksContainer');
+    const query = document.getElementById('search').value.toLowerCase();
+    container.innerHTML = '';
+
+    const sorted = [...links].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+
+    for (let link of sorted) {
+      if (!link.title.toLowerCase().includes(query)) continue;
+
+      const card = document.createElement('div');
+      card.className = 'link-card';
+
+      const img = document.createElement('img');
+      img.src = link.img || 'https://via.placeholder.com/40';
+
+      const a = document.createElement('a');
+      a.href = link.url;
+      a.target = "_blank";
+      a.textContent = link.title;
+
+      card.appendChild(img);
+      card.appendChild(a);
+
+      if (isAdmin) {
+        const pinBtn = document.createElement('button');
+        pinBtn.textContent = link.pinned ? 'Unpin' : 'Pin';
+        pinBtn.onclick = () => {
+          link.pinned = !link.pinned;
+          renderLinks();
+          exportLinks();
+        };
+        card.appendChild(pinBtn);
+      }
+
+      container.appendChild(card);
+    }
+  }
+
+  function exportLinks() {
+    const out = `<script>\nlet links = ${JSON.stringify(links, null, 2)};\n</script>`;
+    const area = document.getElementById('export');
+    area.value = out;
+    area.style.display = 'block';
+  }
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    const pass = prompt("Enter admin password:");
+    if (pass !== PASSWORD) return alert("Wrong password!");
+    isAdmin = true;
+
+    const title = prompt("Enter link title:");
+    const url = prompt("Enter link URL:");
+    const img = prompt("Enter image/logo URL (or leave blank):");
+
+    if (!title || !url) return alert("Title and URL are required!");
+
+    links.push({ title, url, img, pinned: false });
+    renderLinks();
+    exportLinks();
+  });
+
+  document.getElementById('search').addEventListener('input', renderLinks);
+
+  renderLinks();
+});
+</script>
+
+</body>
+</html>
