@@ -21,6 +21,8 @@
       max-width: 600px;
       margin: auto;
       padding: 20px;
+      position: relative;
+      z-index: 10;
     }
     .search-bar {
       width: 100%;
@@ -71,6 +73,7 @@
       border: none;
       box-shadow: 0 0 10px #00ffd5;
       cursor: pointer;
+      z-index: 1001;
     }
     #adminForm {
       display: none;
@@ -109,120 +112,147 @@
       cursor: pointer;
       margin-top: 10px;
     }
+    #exportBox {
+      display: none;
+      margin: 20px auto;
+      max-width: 600px;
+    }
+    #exportBox textarea {
+      width: 100%;
+      height: 300px;
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #00ffd5;
+    }
   </style>
 </head>
 <body>
-
-<div class="header">HiStream</div>
-
-<div class="container">
-  <input type="text" id="search" class="search-bar" placeholder="Search links...">
-  <div id="linksContainer"></div>
-</div>
-
-<button class="add-btn" id="addBtn">+</button>
-
-<!-- Hidden Admin Input Form -->
-<div id="adminForm">
-  <div class="form-box">
-    <input type="password" id="adminPass" placeholder="Enter admin password">
-    <input type="text" id="linkTitle" placeholder="Link Title">
-    <input type="url" id="linkURL" placeholder="Link URL">
-    <input type="url" id="linkImage" placeholder="Image URL (optional)">
-    <button id="submitLink">Add Link</button>
-    <button onclick="document.getElementById('adminForm').style.display='none'">Cancel</button>
+  <div class="header">HiStream</div>
+  <div class="container">
+    <input type="text" id="search" class="search-bar" placeholder="Search links...">
+    <div id="linksContainer"></div>
   </div>
-</div>
 
-<script>
-  const PASSWORD = "histream123";
-  let isAdmin = false;
+  <div id="exportBox">
+    <h3 style="text-align:center">Copy This Updated HTML</h3>
+    <textarea id="export"></textarea>
+  </div>
 
-  let links = [
-    {
-      title: "Google",
-      url: "https://www.google.com",
-      img: "https://www.google.com/favicon.ico",
-      pinned: true
-    },
-    {
-      title: "YouTube",
-      url: "https://www.youtube.com",
-      img: "https://www.youtube.com/s/desktop/5fdf219e/img/favicon.ico",
-      pinned: false
+  <button class="add-btn" id="addBtn">+</button>
+
+  <div id="adminForm">
+    <div class="form-box">
+      <input type="password" id="adminPass" placeholder="Enter admin password">
+      <input type="text" id="linkTitle" placeholder="Link Title">
+      <input type="url" id="linkURL" placeholder="Link URL">
+      <input type="url" id="linkImage" placeholder="Image URL (optional)">
+      <button id="submitLink">Add Link</button>
+      <button onclick="document.getElementById('adminForm').style.display='none'">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const PASSWORD = "histream123";
+    let isAdmin = false;
+
+    let links = [
+      {
+        title: "Google",
+        url: "https://www.google.com",
+        img: "https://www.google.com/favicon.ico",
+        pinned: true
+      },
+      {
+        title: "YouTube",
+        url: "https://www.youtube.com",
+        img: "https://www.youtube.com/s/desktop/5fdf219e/img/favicon.ico",
+        pinned: false
+      }
+    ];
+
+    function renderLinks() {
+      const container = document.getElementById("linksContainer");
+      const query = document.getElementById("search").value.toLowerCase();
+      container.innerHTML = "";
+
+      [...links].sort((a, b) => b.pinned - a.pinned).forEach(link => {
+        if (!link.title.toLowerCase().includes(query)) return;
+
+        const card = document.createElement("div");
+        card.className = "link-card";
+
+        const img = document.createElement("img");
+        img.src = link.img || "https://via.placeholder.com/40";
+
+        const a = document.createElement("a");
+        a.href = link.url;
+        a.textContent = link.title;
+        a.target = "_blank";
+
+        card.appendChild(img);
+        card.appendChild(a);
+
+        if (isAdmin) {
+          const btn = document.createElement("button");
+          btn.textContent = link.pinned ? "Unpin" : "Pin";
+          btn.onclick = () => {
+            link.pinned = !link.pinned;
+            renderLinks();
+          };
+          card.appendChild(btn);
+        }
+
+        container.appendChild(card);
+      });
     }
-  ];
 
-  function renderLinks() {
-    const container = document.getElementById("linksContainer");
-    const query = document.getElementById("search").value.toLowerCase();
-    container.innerHTML = "";
+    function exportLinks() {
+      const html = document.documentElement.outerHTML;
+      const start = html.indexOf("let links = [");
+      const end = html.indexOf(";", start);
+      const before = html.substring(0, start);
+      const after = html.substring(end);
+      const updated = before + "let links = " + JSON.stringify(links, null, 2) + after;
+      document.getElementById("export").value = updated;
+      document.getElementById("exportBox").style.display = "block";
+    }
 
-    [...links].sort((a, b) => b.pinned - a.pinned).forEach(link => {
-      if (!link.title.toLowerCase().includes(query)) return;
+    document.getElementById("addBtn").addEventListener("click", () => {
+      document.getElementById("adminForm").style.display = "flex";
+    });
 
-      const card = document.createElement("div");
-      card.className = "link-card";
+    document.getElementById("submitLink").addEventListener("click", () => {
+      const pass = document.getElementById("adminPass").value;
+      if (pass !== PASSWORD) {
+        alert("Wrong password!");
+        return;
+      }
+      isAdmin = true;
 
-      const img = document.createElement("img");
-      img.src = link.img || "https://via.placeholder.com/40";
+      const title = document.getElementById("linkTitle").value.trim();
+      const url = document.getElementById("linkURL").value.trim();
+      const img = document.getElementById("linkImage").value.trim();
 
-      const a = document.createElement("a");
-      a.href = link.url;
-      a.textContent = link.title;
-      a.target = "_blank";
-
-      card.appendChild(img);
-      card.appendChild(a);
-
-      if (isAdmin) {
-        const btn = document.createElement("button");
-        btn.textContent = link.pinned ? "Unpin" : "Pin";
-        btn.onclick = () => {
-          link.pinned = !link.pinned;
-          renderLinks();
-        };
-        card.appendChild(btn);
+      if (!title || !url) {
+        alert("Title and URL are required!");
+        return;
       }
 
-      container.appendChild(card);
+      links.push({ title, url, img, pinned: false });
+      document.getElementById("adminForm").style.display = "none";
+      document.getElementById("adminPass").value = "";
+      document.getElementById("linkTitle").value = "";
+      document.getElementById("linkURL").value = "";
+      document.getElementById("linkImage").value = "";
+      renderLinks();
+      exportLinks();
     });
-  }
 
-  document.getElementById("addBtn").addEventListener("click", () => {
-    document.getElementById("adminForm").style.display = "flex";
-  });
-
-  document.getElementById("submitLink").addEventListener("click", () => {
-    const pass = document.getElementById("adminPass").value;
-    if (pass !== PASSWORD) {
-      alert("Wrong password!");
-      return;
-    }
-    isAdmin = true;
-
-    const title = document.getElementById("linkTitle").value;
-    const url = document.getElementById("linkURL").value;
-    const img = document.getElementById("linkImage").value;
-
-    if (!title || !url) {
-      alert("Title and URL are required!");
-      return;
-    }
-
-    links.push({ title, url, img, pinned: false });
-    document.getElementById("adminForm").style.display = "none";
-    document.getElementById("adminPass").value = "";
-    document.getElementById("linkTitle").value = "";
-    document.getElementById("linkURL").value = "";
-    document.getElementById("linkImage").value = "";
+    document.getElementById("search").addEventListener("input", renderLinks);
     renderLinks();
-  });
-
-  document.getElementById("search").addEventListener("input", renderLinks);
-
-  renderLinks();
-</script>
-
+  </script>
 </body>
 </html>
