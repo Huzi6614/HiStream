@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>HiStream</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
@@ -112,147 +113,166 @@
       cursor: pointer;
       margin-top: 10px;
     }
-    #exportBox {
-      display: none;
-      margin: 20px auto;
-      max-width: 600px;
+    .ads-top, .ads-bottom {
+      text-align: center;
+      margin: 10px 0;
     }
-    #exportBox textarea {
+    .ads-left, .ads-right {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 90px;
+      background: #181818;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+    }
+    .ads-left {
+      left: 0;
+    }
+    .ads-right {
+      right: 0;
+    }
+    .ads-left iframe,
+    .ads-right iframe,
+    .ads-top iframe,
+    .ads-bottom iframe {
+      border: none;
       width: 100%;
-      height: 300px;
-      background: #000;
-      color: #0f0;
-      font-family: monospace;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #00ffd5;
+      height: 90px;
+    }
+    @media (max-width: 768px) {
+      .ads-left, .ads-right {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">HiStream</div>
-  <div class="container">
-    <input type="text" id="search" class="search-bar" placeholder="Search links...">
-    <div id="linksContainer"></div>
+<div class="ads-left">
+  <iframe src="your-left-ad.html"></iframe>
+</div>
+<div class="ads-right">
+  <iframe src="your-right-ad.html"></iframe>
+</div>
+<div class="ads-top">
+  <iframe src="your-top-ad.html"></iframe>
+</div>
+<div class="header">HiStream</div>
+<div class="container">
+  <input type="text" id="search" class="search-bar" placeholder="Search links...">
+  <div id="linksContainer"></div>
+</div>
+<div class="ads-bottom">
+  <iframe src="your-bottom-ad.html"></iframe>
+</div>
+
+<button class="add-btn" id="addBtn">+</button>
+
+<div id="adminForm">
+  <div class="form-box">
+    <input type="password" id="adminPass" placeholder="Enter admin password">
+    <input type="text" id="linkTitle" placeholder="Link Title">
+    <input type="url" id="linkURL" placeholder="Link URL">
+    <input type="url" id="linkImage" placeholder="Image URL (optional)">
+    <button id="submitLink">Add Link</button>
+    <button onclick="document.getElementById('adminForm').style.display='none'">Cancel</button>
   </div>
+</div>
 
-  <div id="exportBox">
-    <h3 style="text-align:center">Copy This Updated HTML</h3>
-    <textarea id="export"></textarea>
-  </div>
+<script>
+const PASSWORD = "histream123";
+let isAdmin = false;
+let links = JSON.parse(localStorage.getItem("histream_links")) || [
+  {
+    title: "Google",
+    url: "https://www.google.com",
+    img: "https://www.google.com/favicon.ico",
+    pinned: true
+  },
+  {
+    title: "YouTube",
+    url: "https://www.youtube.com",
+    img: "https://www.youtube.com/s/desktop/5fdf219e/img/favicon.ico",
+    pinned: false
+  }
+];
 
-  <button class="add-btn" id="addBtn">+</button>
+function saveLinks() {
+  localStorage.setItem("histream_links", JSON.stringify(links));
+}
 
-  <div id="adminForm">
-    <div class="form-box">
-      <input type="password" id="adminPass" placeholder="Enter admin password">
-      <input type="text" id="linkTitle" placeholder="Link Title">
-      <input type="url" id="linkURL" placeholder="Link URL">
-      <input type="url" id="linkImage" placeholder="Image URL (optional)">
-      <button id="submitLink">Add Link</button>
-      <button onclick="document.getElementById('adminForm').style.display='none'">Cancel</button>
-    </div>
-  </div>
+function renderLinks() {
+  const container = document.getElementById("linksContainer");
+  const query = document.getElementById("search").value.toLowerCase();
+  container.innerHTML = "";
 
-  <script>
-    const PASSWORD = "histream123";
-    let isAdmin = false;
+  [...links].sort((a, b) => b.pinned - a.pinned).forEach(link => {
+    if (!link.title.toLowerCase().includes(query)) return;
 
-    let links = [
-      {
-        title: "Google",
-        url: "https://www.google.com",
-        img: "https://www.google.com/favicon.ico",
-        pinned: true
-      },
-      {
-        title: "YouTube",
-        url: "https://www.youtube.com",
-        img: "https://www.youtube.com/s/desktop/5fdf219e/img/favicon.ico",
-        pinned: false
-      }
-    ];
+    const card = document.createElement("div");
+    card.className = "link-card";
 
-    function renderLinks() {
-      const container = document.getElementById("linksContainer");
-      const query = document.getElementById("search").value.toLowerCase();
-      container.innerHTML = "";
+    const img = document.createElement("img");
+    img.src = link.img || "https://via.placeholder.com/40";
 
-      [...links].sort((a, b) => b.pinned - a.pinned).forEach(link => {
-        if (!link.title.toLowerCase().includes(query)) return;
+    const a = document.createElement("a");
+    a.href = link.url;
+    a.textContent = link.title;
+    a.target = "_blank";
 
-        const card = document.createElement("div");
-        card.className = "link-card";
+    card.appendChild(img);
+    card.appendChild(a);
 
-        const img = document.createElement("img");
-        img.src = link.img || "https://via.placeholder.com/40";
-
-        const a = document.createElement("a");
-        a.href = link.url;
-        a.textContent = link.title;
-        a.target = "_blank";
-
-        card.appendChild(img);
-        card.appendChild(a);
-
-        if (isAdmin) {
-          const btn = document.createElement("button");
-          btn.textContent = link.pinned ? "Unpin" : "Pin";
-          btn.onclick = () => {
-            link.pinned = !link.pinned;
-            renderLinks();
-          };
-          card.appendChild(btn);
-        }
-
-        container.appendChild(card);
-      });
+    if (isAdmin) {
+      const btn = document.createElement("button");
+      btn.textContent = link.pinned ? "Unpin" : "Pin";
+      btn.onclick = () => {
+        link.pinned = !link.pinned;
+        saveLinks();
+        renderLinks();
+      };
+      card.appendChild(btn);
     }
 
-    function exportLinks() {
-      const html = document.documentElement.outerHTML;
-      const start = html.indexOf("let links = [");
-      const end = html.indexOf(";", start);
-      const before = html.substring(0, start);
-      const after = html.substring(end);
-      const updated = before + "let links = " + JSON.stringify(links, null, 2) + after;
-      document.getElementById("export").value = updated;
-      document.getElementById("exportBox").style.display = "block";
-    }
+    container.appendChild(card);
+  });
+}
 
-    document.getElementById("addBtn").addEventListener("click", () => {
-      document.getElementById("adminForm").style.display = "flex";
-    });
+document.getElementById("addBtn").addEventListener("click", () => {
+  document.getElementById("adminForm").style.display = "flex";
+});
 
-    document.getElementById("submitLink").addEventListener("click", () => {
-      const pass = document.getElementById("adminPass").value;
-      if (pass !== PASSWORD) {
-        alert("Wrong password!");
-        return;
-      }
-      isAdmin = true;
+document.getElementById("submitLink").addEventListener("click", () => {
+  const pass = document.getElementById("adminPass").value;
+  if (pass !== PASSWORD) {
+    alert("Wrong password!");
+    return;
+  }
+  isAdmin = true;
 
-      const title = document.getElementById("linkTitle").value.trim();
-      const url = document.getElementById("linkURL").value.trim();
-      const img = document.getElementById("linkImage").value.trim();
+  const title = document.getElementById("linkTitle").value.trim();
+  const url = document.getElementById("linkURL").value.trim();
+  const img = document.getElementById("linkImage").value.trim();
 
-      if (!title || !url) {
-        alert("Title and URL are required!");
-        return;
-      }
+  if (!title || !url) {
+    alert("Title and URL are required!");
+    return;
+  }
 
-      links.push({ title, url, img, pinned: false });
-      document.getElementById("adminForm").style.display = "none";
-      document.getElementById("adminPass").value = "";
-      document.getElementById("linkTitle").value = "";
-      document.getElementById("linkURL").value = "";
-      document.getElementById("linkImage").value = "";
-      renderLinks();
-      exportLinks();
-    });
+  links.push({ title, url, img, pinned: false });
+  saveLinks();
+  renderLinks();
+  document.getElementById("adminForm").style.display = "none";
+  document.getElementById("adminPass").value = "";
+  document.getElementById("linkTitle").value = "";
+  document.getElementById("linkURL").value = "";
+  document.getElementById("linkImage").value = "";
+});
 
-    document.getElementById("search").addEventListener("input", renderLinks);
-    renderLinks();
-  </script>
+document.getElementById("search").addEventListener("input", renderLinks);
+renderLinks();
+</script>
 </body>
 </html>
