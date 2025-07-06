@@ -134,14 +134,6 @@
     .ads-right {
       right: 0;
     }
-    .ads-left iframe,
-    .ads-right iframe,
-    .ads-top iframe,
-    .ads-bottom iframe {
-      border: none;
-      width: 100%;
-      height: 90px;
-    }
     @media (max-width: 768px) {
       .ads-left, .ads-right {
         display: none;
@@ -150,132 +142,138 @@
   </style>
 </head>
 <body>
-<div class="ads-left">
-  <iframe src="<script async="async" data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-<div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>"></iframe>
-</div>
-<div class="ads-right">
-  <iframe src="<script async="async" data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-<div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>"></iframe>
-</div>
-<div class="ads-top">
-  <iframe src="<script async="async" data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-<div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>"></iframe>
-</div>
-<div class="header">HiStream</div>
-<div class="container">
-  <input type="text" id="search" class="search-bar" placeholder="Search links...">
-  <div id="linksContainer"></div>
-</div>
-<div class="ads-bottom">
-  <iframe src="your-bottom-ad.html"></iframe>
-</div>
-
-<button class="add-btn" id="addBtn">+</button>
-
-<div id="adminForm">
-  <div class="form-box">
-    <input type="password" id="adminPass" placeholder="Enter admin password">
-    <input type="text" id="linkTitle" placeholder="Link Title">
-    <input type="url" id="linkURL" placeholder="Link URL">
-    <input type="url" id="linkImage" placeholder="Image URL (optional)">
-    <button id="submitLink">Add Link</button>
-    <button onclick="document.getElementById('adminForm').style.display='none'">Cancel</button>
+  <div class="ads-left">
+    <script async="async" data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+<div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
   </div>
-</div>
 
-<script>
-const PASSWORD = "histream123";
-let isAdmin = false;
-let links = JSON.parse(localStorage.getItem("histream_links")) || [
-  {
-    title: "Google",
-    url: "https://www.google.com",
-    img: "https://www.google.com/favicon.ico",
-    pinned: true
-  },
-  {
-    title: "YouTube",
-    url: "https://www.youtube.com",
-    img: "https://www.youtube.com/s/desktop/5fdf219e/img/favicon.ico",
-    pinned: false
-  }
-];
+  <div class="ads-right">
+   <script async="async" data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+<div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+  </div>
 
-function saveLinks() {
-  localStorage.setItem("histream_links", JSON.stringify(links));
-}
+  <div class="ads-top">
+    <script async="async" data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+<div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+  </div>
 
-function renderLinks() {
-  const container = document.getElementById("linksContainer");
-  const query = document.getElementById("search").value.toLowerCase();
-  container.innerHTML = "";
+  <div class="header">HiStream</div>
 
-  [...links].sort((a, b) => b.pinned - a.pinned).forEach(link => {
-    if (!link.title.toLowerCase().includes(query)) return;
+  <div class="container">
+    <input type="text" id="search" class="search-bar" placeholder="Search links...">
+    <div id="linksContainer"></div>
+  </div>
 
-    const card = document.createElement("div");
-    card.className = "link-card";
+  <div class="ads-bottom">
+    <script async="async" data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+<div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+  </div>
 
-    const img = document.createElement("img");
-    img.src = link.img || "https://via.placeholder.com/40";
+  <button class="add-btn" id="addBtn">+</button>
 
-    const a = document.createElement("a");
-    a.href = link.url;
-    a.textContent = link.title;
-    a.target = "_blank";
+  <div id="adminForm">
+    <div class="form-box">
+      <input type="password" id="adminPass" placeholder="Enter admin password">
+      <input type="text" id="linkTitle" placeholder="Link Title">
+      <input type="url" id="linkURL" placeholder="Link URL">
+      <input type="url" id="linkImage" placeholder="Image URL (optional)">
+      <button id="submitLink">Add Link</button>
+      <button onclick="document.getElementById('adminForm').style.display='none'">Cancel</button>
+    </div>
+  </div>
 
-    card.appendChild(img);
-    card.appendChild(a);
+  <script>
+    const PASSWORD = "histream123";
+    let isAdmin = false;
+    let links = JSON.parse(localStorage.getItem("histream_links")) || [
+      {
+        title: "Google",
+        url: "https://www.google.com",
+        img: "https://www.google.com/favicon.ico",
+        pinned: true
+      },
+      {
+        title: "YouTube",
+        url: "https://www.youtube.com",
+        img: "https://www.youtube.com/s/desktop/5fdf219e/img/favicon.ico",
+        pinned: false
+      }
+    ];
 
-    if (isAdmin) {
-      const btn = document.createElement("button");
-      btn.textContent = link.pinned ? "Unpin" : "Pin";
-      btn.onclick = () => {
-        link.pinned = !link.pinned;
-        saveLinks();
-        renderLinks();
-      };
-      card.appendChild(btn);
+    function saveLinks() {
+      localStorage.setItem("histream_links", JSON.stringify(links));
     }
 
-    container.appendChild(card);
-  });
-}
+    function renderLinks() {
+      const container = document.getElementById("linksContainer");
+      const query = document.getElementById("search").value.toLowerCase();
+      container.innerHTML = "";
 
-document.getElementById("addBtn").addEventListener("click", () => {
-  document.getElementById("adminForm").style.display = "flex";
-});
+      [...links].sort((a, b) => b.pinned - a.pinned).forEach(link => {
+        if (!link.title.toLowerCase().includes(query)) return;
 
-document.getElementById("submitLink").addEventListener("click", () => {
-  const pass = document.getElementById("adminPass").value;
-  if (pass !== PASSWORD) {
-    alert("Wrong password!");
-    return;
-  }
-  isAdmin = true;
+        const card = document.createElement("div");
+        card.className = "link-card";
 
-  const title = document.getElementById("linkTitle").value.trim();
-  const url = document.getElementById("linkURL").value.trim();
-  const img = document.getElementById("linkImage").value.trim();
+        const img = document.createElement("img");
+        img.src = link.img || "https://via.placeholder.com/40";
 
-  if (!title || !url) {
-    alert("Title and URL are required!");
-    return;
-  }
+        const a = document.createElement("a");
+        a.href = link.url;
+        a.textContent = link.title;
+        a.target = "_blank";
 
-  links.push({ title, url, img, pinned: false });
-  saveLinks();
-  renderLinks();
-  document.getElementById("adminForm").style.display = "none";
-  document.getElementById("adminPass").value = "";
-  document.getElementById("linkTitle").value = "";
-  document.getElementById("linkURL").value = "";
-  document.getElementById("linkImage").value = "";
-});
+        card.appendChild(img);
+        card.appendChild(a);
 
-document.getElementById("search").addEventListener("input", renderLinks);
-renderLinks();
-</script>
+        if (isAdmin) {
+          const btn = document.createElement("button");
+          btn.textContent = link.pinned ? "Unpin" : "Pin";
+          btn.onclick = () => {
+            link.pinned = !link.pinned;
+            saveLinks();
+            renderLinks();
+          };
+          card.appendChild(btn);
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById("addBtn").addEventListener("click", () => {
+      document.getElementById("adminForm").style.display = "flex";
+    });
+
+    document.getElementById("submitLink").addEventListener("click", () => {
+      const pass = document.getElementById("adminPass").value;
+      if (pass !== PASSWORD) {
+        alert("Wrong password!");
+        return;
+      }
+      isAdmin = true;
+
+      const title = document.getElementById("linkTitle").value.trim();
+      const url = document.getElementById("linkURL").value.trim();
+      const img = document.getElementById("linkImage").value.trim();
+
+      if (!title || !url) {
+        alert("Title and URL are required!");
+        return;
+      }
+
+      links.push({ title, url, img, pinned: false });
+      saveLinks();
+      renderLinks();
+      document.getElementById("adminForm").style.display = "none";
+      document.getElementById("adminPass").value = "";
+      document.getElementById("linkTitle").value = "";
+      document.getElementById("linkURL").value = "";
+      document.getElementById("linkImage").value = "";
+    });
+
+    document.getElementById("search").addEventListener("input", renderLinks);
+    renderLinks();
+  </script>
 </body>
 </html>
