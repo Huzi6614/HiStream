@@ -124,20 +124,28 @@
 </head>
 <body>
 <div class="cursor" id="cursor"></div>
-<div class="banner-ad-top"></div>
-<div class="banner-ad-bottom"></div>
+
+<div class="banner-ad-top">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+</div>
+<div class="banner-ad-bottom">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+</div>
+
 <div class="header">HiStream</div>
 <div class="container">
   <div class="guide">
     🎥 Ads will be open on new tab - see them and come back<br>
-    🚀 Click 'Skip Ads' → stay 20s on ad page → All ads off for 30 min.<br>
+    🚀 Click anywhere → stay 20s on ad page → All ads off for 30 min.<br>
     ❌ Leave early = no skip.<br>
-    Follow on TikTok, Insta, and Facebook & comment your fav shows!<br>
-    Search the video to see it.    
+    Follow on TikTok, Insta, and Facebook & comment your fav shows!
   </div>
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
 </div>
+
 <script>
 const directAdUrls = [
   "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1",
@@ -145,9 +153,21 @@ const directAdUrls = [
 ];
 
 const videos = [
-  { title: "Squid game Season 3 hindi", embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview" },
-  { title: "Ballerina Hindi dub", embedDirect: "https://drive.google.com/file/d/1UpdH0p1LmevhWtyxCsFMXrKpFZJVDaCz/preview" },
-  { title: "The family star Hindi", embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview" }
+  {
+    title: "Squid game Season 3 hindi",
+    embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
+    thumbnail: ""
+  },
+  {
+    title: "Ballerina Hindi dub",
+    embedDirect: "https://drive.google.com/file/d/1UpdH0p1LmevhWtyxCsFMXrKpFZJVDaCz/preview",
+    thumbnail: ""
+  },
+  {
+    title: "The family star Hindi",
+    embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
+    thumbnail: ""
+  }
 ];
 
 function renderVideos(list = videos) {
@@ -157,12 +177,12 @@ function renderVideos(list = videos) {
     const card = document.createElement("div");
     card.className = "link-card";
     card.innerHTML = `
-      <button onclick="toggleVideo(${i}, this)">\u25B6\uFE0F ${vid.title}</button>
+      <button onclick="toggleVideo(${i}, this)">▶️ ${vid.title}</button>
       <div class="video-wrapper">
         <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
       </div>
       <div class="skip-button">
-        <button onclick="startSkipProcess(this)">\uD83D\uDE80 Skip Ads</button>
+        <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
         <div class="progress-bar"></div>
       </div>
       <div class="status-box"></div>
@@ -186,14 +206,16 @@ function toggleVideo(index, btn) {
   wrapper.style.display = "block";
 
   const now = Date.now();
-  const skipUntil = parseInt(localStorage.getItem("skipAdUntil") || 0);
-  if (now < skipUntil) {
-    skipDiv.style.display = "none";
-    statusDiv.textContent = "\u2705 Ads skipped (active)";
-    statusDiv.style.display = "block";
-  } else {
+  const lastSkip = localStorage.getItem("skipAdUntil");
+  const adsActive = !lastSkip || now > parseInt(lastSkip);
+
+  if (adsActive) {
     skipDiv.style.display = "block";
     statusDiv.style.display = "none";
+  } else {
+    skipDiv.style.display = "none";
+    statusDiv.innerHTML = "✅ Ads skipped (active)";
+    statusDiv.style.display = "block";
   }
 }
 
@@ -205,7 +227,7 @@ function startSkipProcess(btn) {
   const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
   const adWindow = window.open(adUrl, "_blank");
 
-  statusDiv.textContent = "\u23F3 Stay 20s on ad...";
+  statusDiv.innerHTML = "⏳ Stay 20s on ad...";
   statusDiv.style.display = "block";
   progressBar.style.width = "0%";
 
@@ -216,7 +238,7 @@ function startSkipProcess(btn) {
     if (elapsed >= 20) {
       clearInterval(timer);
       localStorage.setItem("skipAdUntil", Date.now() + 30 * 60 * 1000);
-      statusDiv.textContent = "\u2705 Ads skipped for 30 minutes!";
+      statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
       skipDiv.style.display = "none";
     }
   }, 1000);
@@ -226,8 +248,8 @@ function startSkipProcess(btn) {
       clearInterval(checker);
       if (elapsed < 20) {
         clearInterval(timer);
+        statusDiv.innerHTML = "❌ You returned early. Try again.";
         progressBar.style.width = "0%";
-        statusDiv.textContent = "\u274C You returned early. Try again.";
       }
     }
   }, 500);
@@ -235,8 +257,21 @@ function startSkipProcess(btn) {
 
 function filterVideos(query) {
   const lower = query.toLowerCase();
-  renderVideos(videos.filter(v => v.title.toLowerCase().includes(lower)));
+  const filtered = videos.filter(v => v.title.toLowerCase().includes(lower));
+  renderVideos(filtered);
 }
+
+let lastAdClickTime = 0;
+const adCooldown = 10000;
+
+document.body.addEventListener("click", () => {
+  const now = Date.now();
+  if (now - lastAdClickTime > adCooldown) {
+    lastAdClickTime = now;
+    const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
+    window.open(adUrl, "_blank");
+  }
+});
 
 document.addEventListener("mousemove", e => {
   const cursor = document.getElementById("cursor");
@@ -244,7 +279,9 @@ document.addEventListener("mousemove", e => {
   cursor.style.top = e.clientY + "px";
 });
 
-window.onload = renderVideos;
+window.onload = () => {
+  renderVideos();
+};
 </script>
 </body>
 </html>
