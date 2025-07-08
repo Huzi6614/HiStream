@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HiStream </title>
+  <title>HiStream</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -85,9 +85,6 @@
       text-align: center;
       box-shadow: 0 0 10px #00ffd5;
     }
-    .ads {
-      display: none;
-    }
     .skip-button {
       display: none;
       text-align: center;
@@ -110,7 +107,7 @@
       margin-top: 10px;
       transition: width 1s linear;
     }
-    .invideo-ads {
+    .ad-overlay {
       position: absolute;
       top: 10px;
       left: 10px;
@@ -129,7 +126,7 @@
 <div class="header">HiStream</div>
 <div class="container">
   <div class="guide">
-    🎥 All Ads play inside the video .<br>
+    🎥 All Ads play inside the video from the beginning.<br>
     🚀 Click "Skip Ads" → stay 20s on direct-link → Ads disabled for 30 minutes.<br>
     ❌ Returning early cancels skipping.
   </div>
@@ -139,11 +136,9 @@
 
 <script>
 let skipCooldown = 30 * 60 * 1000;
-let lastAdTime = 0;
-const adInterval = 2 * 60 * 1000; // 2 minutes
 const directAdUrl = "https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163";
 const bannerScriptSrc = "//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js";
-const pushScriptSrc = '/pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js';
+const pushScriptSrc = "//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
 
 const videos = [
   {
@@ -167,7 +162,7 @@ function renderVideos(list = videos) {
       <button onclick="playVideo(${i}, this)">▶️ Watch Now</button>
       <div style="position:relative">
         <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
-        <div class="invideo-ads" id="ads-${i}" style="display:none">Loading ads...</div>
+        <div class="ad-overlay" id="ads-${i}" style="display:none">🎯 Ads running...</div>
       </div>
       <div class="skip-button">
         <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
@@ -182,12 +177,12 @@ function renderVideos(list = videos) {
 function playVideo(index, btn) {
   const card = btn.parentElement;
   const iframe = card.querySelector("iframe");
-  const adsDisplay = card.querySelector(".invideo-ads");
+  const adsDisplay = card.querySelector(".ad-overlay");
   const skipDiv = card.querySelector(".skip-button");
   const statusDiv = card.querySelector(".status-box");
 
   document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
-  document.querySelectorAll(".invideo-ads").forEach(d => d.style.display = "none");
+  document.querySelectorAll(".ad-overlay").forEach(d => d.style.display = "none");
   document.querySelectorAll(".skip-button").forEach(s => s.style.display = "none");
   document.querySelectorAll(".status-box").forEach(s => s.innerHTML = "");
 
@@ -201,7 +196,6 @@ function playVideo(index, btn) {
   if (canShowAds) {
     adsDisplay.style.display = "block";
     skipDiv.style.display = "block";
-    adsDisplay.textContent = "🎯 Ads Running...";
     runInVideoAds(adsDisplay);
   } else {
     statusDiv.innerHTML = "✅ Ads are skipped (active)";
@@ -209,7 +203,6 @@ function playVideo(index, btn) {
 }
 
 function runInVideoAds(container) {
-  container.textContent = "🎯 Showing banner, push & direct ads...";
   if (!window.bannerLoaded) {
     const bScript = document.createElement('script');
     bScript.src = bannerScriptSrc;
@@ -224,13 +217,8 @@ function runInVideoAds(container) {
     document.body.appendChild(pScript);
     window.pushLoaded = true;
   }
-
-  setInterval(() => {
-    const lastSkip = localStorage.getItem("skipAdUntil");
-    if (!lastSkip || Date.now() > parseInt(lastSkip)) {
-      window.open(directAdUrl, "_blank");
-    }
-  }, adInterval);
+  window.open(directAdUrl, "_blank");
+  container.innerText = "🎯 Banner + Push + Direct Ad loaded...";
 }
 
 function startSkipProcess(btn) {
@@ -250,7 +238,7 @@ function startSkipProcess(btn) {
       clearInterval(timer);
       localStorage.setItem("skipAdUntil", Date.now() + skipCooldown);
       statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
-      document.querySelectorAll(".invideo-ads").forEach(d => d.style.display = "none");
+      document.querySelectorAll(".ad-overlay").forEach(d => d.style.display = "none");
       document.querySelectorAll(".skip-button").forEach(d => d.style.display = "none");
     }
   }, 1000);
