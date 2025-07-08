@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>HiStream</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       background: #0f0f0f;
@@ -116,16 +116,10 @@
       text-align: center;
       box-shadow: 0 0 10px #00ffd5;
     }
-
-    /* Banner Ads Styling */
     .banner-ad-top, .banner-ad-bottom {
       text-align: center;
       margin: 10px auto;
-      max-width: 728px;
-      height: 90px;
-      overflow: hidden;
     }
-
     .banner-ad-left, .banner-ad-right {
       position: fixed;
       top: 100px;
@@ -133,188 +127,183 @@
       height: 600px;
       background: #111;
       z-index: 999;
-      overflow: hidden;
     }
     .banner-ad-left { left: 0; }
     .banner-ad-right { right: 0; }
   </style>
 </head>
 <body>
-  <div class="cursor" id="cursor"></div>
+<div class="cursor" id="cursor"></div>
 
-  <!-- Banner Ads -->
-  <div class="banner-ad-top">
-    <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-    <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-top"></div>
+<!-- Banner Ads -->
+<div class="banner-ad-top">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+</div>
+<div class="banner-ad-bottom">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+</div>
+<div class="banner-ad-left">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+</div>
+<div class="banner-ad-right">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+</div>
+
+<div class="header">HiStream</div>
+<div class="container">
+  <div class="guide">
+    🎥 Ads will be open on new tab - see them and come back<br>
+    🚀 Click anywhere → stay 20s on ad page → All ads off for 30 min.<br>
+    ❌ Leave early = no skip.<br>
+    Follow on TikTok, Insta, and Facebook & comment your fav shows!
   </div>
+  <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
+  <div id="videoList"></div>
+</div>
 
-  <div class="banner-ad-bottom">
-    <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-    <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-bottom"></div>
-  </div>
+<!-- Push Ads -->
+<script src='//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js'></script>
 
-  <div class="banner-ad-left">
-    <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-    <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-left"></div>
-  </div>
+<script>
+const directAdUrls = [
+  "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1",
+  "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a"
+];
+const videos = [
+  {
+    title: "Squid game Season 3 hindi",
+    embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
+    thumbnail: ""
+  },
+  {
+    title: "The family star Hindi",
+    embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
+    thumbnail: ""
+  }
+];
 
-  <div class="banner-ad-right">
-    <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-    <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-right"></div>
-  </div>
+let adIndex = 0;
+let directAdLoopStarted = false;
 
-  <div class="header">HiStream</div>
-  <div class="container">
-    <div class="guide">
-      🎥 Ads will be open on new tab - see them and come back<br>
-      🚀 Click anywhere → stay 20s on ad page → All ads off for 30 min.<br>
-      ❌ Leave early = no skip.<br>
-      Follow on TikTok, Insta, and Facebook & comment your fav shows!
-    </div>
-    <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
-    <div id="videoList"></div>
-  </div>
+function renderVideos(list = videos) {
+  const container = document.getElementById("videoList");
+  container.innerHTML = "";
+  list.forEach((vid, i) => {
+    const card = document.createElement("div");
+    card.className = "link-card";
+    card.innerHTML = `
+      <button onclick="toggleVideo(${i}, this)">▶️ ${vid.title}</button>
+      <div class="video-wrapper">
+        <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
+      </div>
+      <div class="skip-button">
+        <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
+        <div class="progress-bar"></div>
+      </div>
+      <div class="status-box"></div>
+    `;
+    container.appendChild(card);
+  });
+}
 
-  <!-- Push Ads -->
-  <script type="text/javascript" src="//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js"></script>
+function toggleVideo(index, btn) {
+  const card = btn.parentElement;
+  const iframe = card.querySelector("iframe");
+  const wrapper = card.querySelector(".video-wrapper");
+  const skipDiv = card.querySelector(".skip-button");
+  const statusDiv = card.querySelector(".status-box");
 
-  <script>
-    const directAdUrls = [
-      "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1",
-      "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a"
-    ];
+  document.querySelectorAll(".video-wrapper, .skip-button, .status-box").forEach(el => el.style.display = "none");
+  document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
 
-    const videos = [
-      {
-        title: "Squid game Season 3 hindi",
-        embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
-        thumbnail: ""
-      },
-      {
-        title: "The family star Hindi",
-        embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
-        thumbnail: ""
+  if (!iframe.src) iframe.src = iframe.dataset.src;
+  iframe.style.display = "block";
+  wrapper.style.display = "block";
+
+  const now = Date.now();
+  const lastSkip = localStorage.getItem("skipAdUntil");
+  const adsActive = !lastSkip || now > parseInt(lastSkip);
+
+  if (adsActive) {
+    skipDiv.style.display = "block";
+    statusDiv.style.display = "none";
+  } else {
+    skipDiv.style.display = "none";
+    statusDiv.innerHTML = "✅ Ads skipped (active)";
+    statusDiv.style.display = "block";
+  }
+}
+
+function startSkipProcess(btn) {
+  const skipDiv = btn.parentElement;
+  const statusDiv = skipDiv.nextElementSibling;
+  const progressBar = skipDiv.querySelector(".progress-bar");
+
+  const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
+  const adWindow = window.open(adUrl, "_blank");
+
+  statusDiv.innerHTML = "⏳ Stay 20s on ad...";
+  statusDiv.style.display = "block";
+  progressBar.style.width = "0%";
+
+  let elapsed = 0;
+  const timer = setInterval(() => {
+    elapsed++;
+    progressBar.style.width = (elapsed * 5) + "%";
+    if (elapsed >= 20) {
+      clearInterval(timer);
+      localStorage.setItem("skipAdUntil", Date.now() + 30 * 60 * 1000);
+      statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
+      skipDiv.style.display = "none";
+    }
+  }, 1000);
+
+  const checker = setInterval(() => {
+    if (adWindow.closed) {
+      clearInterval(timer);
+      clearInterval(checker);
+      if (elapsed < 20) {
+        statusDiv.innerHTML = "❌ You returned early. Try again.";
+        progressBar.style.width = "0%";
       }
-    ];
-
-    let adIndex = 0;
-    let directAdLoopStarted = false;
-
-    function renderVideos(list = videos) {
-      const container = document.getElementById("videoList");
-      container.innerHTML = "";
-      list.forEach((vid, i) => {
-        const card = document.createElement("div");
-        card.className = "link-card";
-        card.innerHTML = `
-          <button onclick="toggleVideo(${i}, this)">▶️ ${vid.title}</button>
-          <div class="video-wrapper">
-            <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
-          </div>
-          <div class="skip-button">
-            <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
-            <div class="progress-bar"></div>
-          </div>
-          <div class="status-box"></div>
-        `;
-        container.appendChild(card);
-      });
     }
+  }, 500);
+}
 
-    function toggleVideo(index, btn) {
-      const card = btn.parentElement;
-      const iframe = card.querySelector("iframe");
-      const wrapper = card.querySelector(".video-wrapper");
-      const skipDiv = card.querySelector(".skip-button");
-      const statusDiv = card.querySelector(".status-box");
+function filterVideos(query) {
+  const lower = query.toLowerCase();
+  const filtered = videos.filter(v => v.title.toLowerCase().includes(lower));
+  renderVideos(filtered);
+}
 
-      document.querySelectorAll(".video-wrapper, .skip-button, .status-box").forEach(el => el.style.display = "none");
-      document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
+function launchDirectAdsLoop() {
+  if (directAdLoopStarted) return;
+  directAdLoopStarted = true;
 
-      if (!iframe.src) iframe.src = iframe.dataset.src;
-      iframe.style.display = "block";
-      wrapper.style.display = "block";
+  setInterval(() => {
+    const adUrl = directAdUrls[adIndex % directAdUrls.length];
+    adIndex++;
+    window.open(adUrl, "_blank");
+  }, 5000); // Every 5 seconds
+}
 
-      const now = Date.now();
-      const lastSkip = localStorage.getItem("skipAdUntil");
-      const adsActive = !lastSkip || now > parseInt(lastSkip);
+document.body.addEventListener("click", () => {
+  launchDirectAdsLoop();
+});
 
-      if (adsActive) {
-        skipDiv.style.display = "block";
-        statusDiv.style.display = "none";
-      } else {
-        skipDiv.style.display = "none";
-        statusDiv.innerHTML = "✅ Ads skipped (active)";
-        statusDiv.style.display = "block";
-      }
-    }
+document.addEventListener("mousemove", e => {
+  const cursor = document.getElementById("cursor");
+  cursor.style.left = e.clientX + "px";
+  cursor.style.top = e.clientY + "px";
+});
 
-    function startSkipProcess(btn) {
-      const skipDiv = btn.parentElement;
-      const statusDiv = skipDiv.nextElementSibling;
-      const progressBar = skipDiv.querySelector(".progress-bar");
-
-      const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
-      const adWindow = window.open(adUrl, "_blank");
-
-      statusDiv.innerHTML = "⏳ Stay 20s on ad...";
-      statusDiv.style.display = "block";
-      progressBar.style.width = "0%";
-
-      let elapsed = 0;
-      const timer = setInterval(() => {
-        elapsed++;
-        progressBar.style.width = (elapsed * 5) + "%";
-        if (elapsed >= 20) {
-          clearInterval(timer);
-          localStorage.setItem("skipAdUntil", Date.now() + 30 * 60 * 1000);
-          statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
-          skipDiv.style.display = "none";
-        }
-      }, 1000);
-
-      const checker = setInterval(() => {
-        if (adWindow.closed) {
-          clearInterval(timer);
-          clearInterval(checker);
-          if (elapsed < 20) {
-            statusDiv.innerHTML = "❌ You returned early. Try again.";
-            progressBar.style.width = "0%";
-          }
-        }
-      }, 500);
-    }
-
-    function filterVideos(query) {
-      const lower = query.toLowerCase();
-      const filtered = videos.filter(v => v.title.toLowerCase().includes(lower));
-      renderVideos(filtered);
-    }
-
-    function launchDirectAdsLoop() {
-      if (directAdLoopStarted) return;
-      directAdLoopStarted = true;
-
-      setInterval(() => {
-        const adUrl = directAdUrls[adIndex % directAdUrls.length];
-        adIndex++;
-        window.open(adUrl, "_blank");
-      }, 5000); // Every 5 seconds
-    }
-
-    document.body.addEventListener("click", () => {
-      launchDirectAdsLoop();
-    });
-
-    document.addEventListener("mousemove", e => {
-      const cursor = document.getElementById("cursor");
-      cursor.style.left = e.clientX + "px";
-      cursor.style.top = e.clientY + "px";
-    });
-
-    window.onload = () => {
-      renderVideos();
-    };
-  </script>
+window.onload = () => {
+  renderVideos();
+};
+</script>
 </body>
 </html>
