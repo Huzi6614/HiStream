@@ -93,6 +93,7 @@
       background: rgba(0, 0, 0, 0.6);
       border-radius: 8px;
       overflow: hidden;
+      display: none;
     }
     .guide, .status-box {
       background: #222;
@@ -131,7 +132,7 @@
 <div class="header">HiStream</div>
 <div class="container">
   <div class="guide">
-    🎥 Ads will play inside the video .<br>
+    🎥 Ads will play inside the video.<br>
     🚀 Click "Skip Ads" → stay 20s on direct-link → All ads disabled for 30 minutes.<br>
     ❌ Leaving early = skip fails.
   </div>
@@ -201,14 +202,14 @@ function playVideo(index, btn) {
   const lastSkip = localStorage.getItem("skipAdUntil");
   const canShowAds = !lastSkip || now > parseInt(lastSkip);
 
-  const startAdDuration = 10000; // 10 sec
-  const midAdDelay = 60000; // 60 sec
-  const midAdDuration = 10000; // 10 sec
+  const startAdDuration = 10000;
+  const midAdDelay = 60000;
+  const midAdDuration = 10000;
 
-  // Function to pause and resume video
   function pauseVideo() {
     try { iframe.contentWindow.postMessage('pause', '*'); } catch {}
   }
+
   function playVideoAgain() {
     try { iframe.contentWindow.postMessage('play', '*'); } catch {}
   }
@@ -232,22 +233,17 @@ function playVideo(index, btn) {
       window.pushLoaded = true;
     }
 
-    window.open(directAdUrl, "_blank");
-
-    // Initial 10 sec ad
-    pauseVideo();
+    // Show initial ad on user click (bypass popup blockers)
     setTimeout(() => {
       adsDisplay.style.display = "none";
       playVideoAgain();
     }, startAdDuration);
 
-    // Mid 1-minute ad
+    pauseVideo();
     setTimeout(() => {
       const lastSkip2 = localStorage.getItem("skipAdUntil");
-      const stillShowAds = !lastSkip2 || Date.now() > parseInt(lastSkip2);
-      if (stillShowAds) {
+      if (!lastSkip2 || Date.now() > parseInt(lastSkip2)) {
         adsDisplay.style.display = "block";
-        window.open(directAdUrl, "_blank");
         pauseVideo();
         setTimeout(() => {
           adsDisplay.style.display = "none";
@@ -259,14 +255,13 @@ function playVideo(index, btn) {
     statusDiv.innerHTML = "✅ Ads are skipped (active)";
   }
 
-  // Show ads also in fullscreen
   document.addEventListener('fullscreenchange', () => {
-    const fsElement = document.fullscreenElement;
-    if (fsElement && fsElement.contains(iframe)) {
+    if (document.fullscreenElement && document.fullscreenElement.contains(iframe)) {
       adsDisplay.style.display = "block";
     }
   });
 }
+
 function startSkipProcess(btn) {
   const skipDiv = btn.parentElement;
   const statusDiv = skipDiv.nextElementSibling;
