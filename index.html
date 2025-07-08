@@ -34,6 +34,8 @@
       max-width: 700px;
       margin: auto;
       padding: 20px;
+      position: relative;
+      z-index: 1;
     }
     .search-bar {
       width: 100%;
@@ -83,18 +85,6 @@
       position: relative;
       z-index: 1;
     }
-    .ad-banner-inside-video {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 2;
-      width: 300px;
-      height: 250px;
-      background: rgba(0, 0, 0, 0.6);
-      border-radius: 8px;
-      overflow: hidden;
-      display: none;
-    }
     .guide, .status-box {
       background: #222;
       color: #00ffd5;
@@ -126,39 +116,81 @@
       margin-top: 10px;
       transition: width 1s linear;
     }
+    /* Page-wide banner ad containers */
+    .banner-ad-top, .banner-ad-bottom {
+      text-align: center;
+      margin: 10px auto;
+    }
+    .banner-ad-left, .banner-ad-right {
+      position: fixed;
+      top: 100px;
+      width: 160px;
+      height: 600px;
+      background: #111;
+      z-index: 999;
+    }
+    .banner-ad-left { left: 0; }
+    .banner-ad-right { right: 0; }
+    iframe {
+      border: none;
+    }
   </style>
 </head>
 <body>
 <div class="cursor" id="cursor"></div>
+
+<!-- Banner Ads: Top, Bottom, Left, Right -->
+<div class="banner-ad-top" id="top-banner"></div>
+<div class="banner-ad-bottom" id="bottom-banner"></div>
+<div class="banner-ad-left" id="left-banner"></div>
+<div class="banner-ad-right" id="right-banner"></div>
+
 <div class="header">HiStream</div>
 <div class="container">
   <div class="guide">
     🎥 Ads will pause video for 20s.<br>
     🚀 Click "Skip Ads" → stay 20s on ad page → All ads off for 30 min.<br>
-    ❌ Leave early = no skip.
+    ❌ Leave early = no skip.<br>
+    Tell or comment us on TikTok , Insta and Facebook to add your fav movies and also follow us to support this program.
   </div>
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
 </div>
 
 <script>
-let skipCooldown = 30 * 60 * 1000;
-const directAdUrl = "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1";  
-const bannerScriptSrc = "//pl27111861.profitableratecpm.com/3b/dc/99/3bdc999650b6991b28083704cfa82087.js";  
-const pushScriptSrc = "//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
+const directAdUrl = "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1";
+const bannerScriptSrc = "https://pl27111861.profitableratecpm.com/3b/dc/99/3bdc999650b6991b28083704cfa82087.js";
+const pushScriptSrc = "https://pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
+const skipCooldown = 30 * 60 * 1000;
 
 const videos = [
   {
-    title: "The Family Star Hindi",
+    title: "The family star Hindi",
     embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
     thumbnail: "https://assets-in.bmscdn.com/iedb/movies/images/mobile/thumbnail/xlarge/the-family-star-et00373701-1711976553.jpg"
-  },
-  {
-    title: "Animal Hindi",
-    embedDirect: "https://drive.google.com/file/d/1XdqsI1XsCEpVIXQKue8LS1NvXbnKrYqU/preview",
-    thumbnail: "https://i.ytimg.com/vi/6mds7zA3lNs/hqdefault.jpg"
   }
 ];
+
+function loadGlobalBannerAds() {
+  const positions = ["top-banner", "bottom-banner", "left-banner", "right-banner"];
+  positions.forEach(id => {
+    const container = document.getElementById(id);
+    const script = document.createElement("script");
+    script.src = bannerScriptSrc;
+    script.async = true;
+    container.appendChild(script);
+  });
+}
+
+function loadPushOnce() {
+  if (!window.pushLoaded) {
+    const push = document.createElement("script");
+    push.src = pushScriptSrc;
+    push.setAttribute("data-cfasync", "false");
+    document.body.appendChild(push);
+    window.pushLoaded = true;
+  }
+}
 
 function renderVideos(list = videos) {
   const container = document.getElementById("videoList");
@@ -174,9 +206,6 @@ function renderVideos(list = videos) {
       <button onclick="playVideo(${i}, this)">▶️ Watch Now</button>
       <div class="video-wrapper">
         <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
-        <div class="ad-banner-inside-video" id="ads-${i}">
-          <div id="banner-slot-${i}"></div>
-        </div>
       </div>
       <div class="skip-button">
         <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
@@ -191,13 +220,10 @@ function renderVideos(list = videos) {
 function playVideo(index, btn) {
   const card = btn.parentElement;
   const iframe = card.querySelector("iframe");
-  const bannerSlot = card.querySelector(`#banner-slot-${index}`);
-  const adsDisplay = card.querySelector(".ad-banner-inside-video");
   const skipDiv = card.querySelector(".skip-button");
   const statusDiv = card.querySelector(".status-box");
 
   document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
-  document.querySelectorAll(".ad-banner-inside-video").forEach(d => d.style.display = "none");
   document.querySelectorAll(".skip-button").forEach(s => s.style.display = "none");
   document.querySelectorAll(".status-box").forEach(s => s.innerHTML = "");
 
@@ -209,43 +235,24 @@ function playVideo(index, btn) {
   const showAds = !lastSkip || now > parseInt(lastSkip);
 
   if (showAds) {
-    showAdIrritant(iframe, adsDisplay, bannerSlot, skipDiv);
+    loadPushOnce();
+
+    // First click triggers popunder
+    const onFirstClick = () => {
+      window.open(directAdUrl, "_blank");
+      window.removeEventListener("click", onFirstClick);
+    };
+    window.addEventListener("click", onFirstClick);
+
+    skipDiv.style.display = "block";
+    try { iframe.contentWindow.postMessage('pause', '*'); } catch {}
+
+    setTimeout(() => {
+      try { iframe.contentWindow.postMessage('play', '*'); } catch {}
+    }, 20000);
   } else {
     statusDiv.innerHTML = "✅ Ads skipped (active)";
   }
-}
-
-function showAdIrritant(iframe, adsDisplay, bannerSlot, skipDiv) {
-  if (!bannerSlot.hasChildNodes()) {
-    const bannerScript = document.createElement("script");
-    bannerScript.src = bannerScriptSrc;
-    bannerScript.async = true;
-    bannerSlot.appendChild(bannerScript);
-  }
-
-  if (!window.pushLoaded) {
-    const pushScript = document.createElement("script");
-    pushScript.src = pushScriptSrc;
-    pushScript.setAttribute("data-cfasync", "false");
-    document.body.appendChild(pushScript);
-    window.pushLoaded = true;
-  }
-
-  adsDisplay.style.display = "block";
-  skipDiv.style.display = "block";
-
-  try { iframe.contentWindow.postMessage('pause', '*'); } catch {}
-
-  const onFirstClick = () => {
-    window.open(directAdUrl, "_blank");
-    window.removeEventListener("click", onFirstClick);
-  };
-  window.addEventListener("click", onFirstClick);
-
-  setTimeout(() => {
-    adsDisplay.style.display = "none";
-    try { iframe.contentWindow.postMessage('play', '*'); } catch {}
-  }, 20000); // 20 sec
 }
 
 function startSkipProcess(btn) {
@@ -265,7 +272,6 @@ function startSkipProcess(btn) {
       clearInterval(timer);
       localStorage.setItem("skipAdUntil", Date.now() + skipCooldown);
       statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
-      document.querySelectorAll(".ad-banner-inside-video").forEach(d => d.style.display = "none");
       document.querySelectorAll(".skip-button").forEach(s => s.style.display = "none");
     }
   }, 1000);
@@ -293,6 +299,7 @@ document.addEventListener("mousemove", e => {
 });
 
 renderVideos();
+loadGlobalBannerAds();
 </script>
 </body>
 </html>
