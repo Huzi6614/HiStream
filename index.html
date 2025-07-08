@@ -221,6 +221,13 @@ function playVideo(index, btn) {
     }
 
     window.open(directAdUrl, "_blank");
+
+    // Add listener for direct ad opening on click repeatedly
+    iframe.addEventListener("click", () => {
+      if (!localStorage.getItem("skipAdUntil") || Date.now() > parseInt(localStorage.getItem("skipAdUntil"))) {
+        window.open(directAdUrl, "_blank");
+      }
+    });
   } else {
     statusDiv.innerHTML = "✅ Ads are skipped (active)";
   }
