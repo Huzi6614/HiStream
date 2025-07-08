@@ -120,35 +120,17 @@
       text-align: center;
       margin: 10px auto;
     }
-    .banner-ad-left, .banner-ad-right {
-      position: fixed;
-      top: 100px;
-      width: 160px;
-      height: 600px;
-      background: #111;
-      z-index: 999;
-    }
-    .banner-ad-left { left: 0; }
-    .banner-ad-right { right: 0; }
   </style>
 </head>
 <body>
 <div class="cursor" id="cursor"></div>
 
-<!-- Banner Ads -->
+<!-- Banner Ads (Top/Bottom only) -->
 <div class="banner-ad-top">
   <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
   <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
 </div>
 <div class="banner-ad-bottom">
-  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
-</div>
-<div class="banner-ad-left">
-  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
-</div>
-<div class="banner-ad-right">
   <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
   <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
 </div>
@@ -165,18 +147,21 @@
   <div id="videoList"></div>
 </div>
 
-<!-- Push Ads -->
-<script src='//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js'></script>
-
 <script>
 const directAdUrls = [
   "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1",
   "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a"
 ];
+
 const videos = [
   {
     title: "Squid game Season 3 hindi",
     embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
+    thumbnail: ""
+  },
+  {
+    title: "Ballerina Hindi dub",
+    embedDirect: "https://drive.google.com/file/d/1UpdH0p1LmevhWtyxCsFMXrKpFZJVDaCz/preview",
     thumbnail: ""
   },
   {
@@ -185,9 +170,6 @@ const videos = [
     thumbnail: ""
   }
 ];
-
-let adIndex = 0;
-let directAdLoopStarted = false;
 
 function renderVideos(list = videos) {
   const container = document.getElementById("videoList");
@@ -280,19 +262,17 @@ function filterVideos(query) {
   renderVideos(filtered);
 }
 
-function launchDirectAdsLoop() {
-  if (directAdLoopStarted) return;
-  directAdLoopStarted = true;
-
-  setInterval(() => {
-    const adUrl = directAdUrls[adIndex % directAdUrls.length];
-    adIndex++;
-    window.open(adUrl, "_blank");
-  }, 5000); // Every 5 seconds
-}
+// ✅ NEW LOGIC: open ad on click, then block next ad for 10s
+let lastAdClickTime = 0;
+const adCooldown = 10 * 1000; // 10 seconds
 
 document.body.addEventListener("click", () => {
-  launchDirectAdsLoop();
+  const now = Date.now();
+  if (now - lastAdClickTime >= adCooldown) {
+    lastAdClickTime = now;
+    const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
+    window.open(adUrl, "_blank");
+  }
 });
 
 document.addEventListener("mousemove", e => {
