@@ -2,170 +2,278 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>HiStream</title>
+  <title>HiStream </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { background: #111; color: #fff; font-family: Arial; margin: 0; }
-    .header { text-align: center; font-size: 40px; margin-top: 20px; color: #00ffd5; text-shadow: 0 0 10px #00ffd5; }
-    .container { max-width: 700px; margin: auto; padding: 20px; }
-    .search-bar { width: 100%; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 16px; }
-    .link-card { background: #222; margin: 10px 0; padding: 15px; border-radius: 10px; }
-    .link-card button { background: #00ffd5; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    iframe { width: 100%; height: 360px; margin-top: 15px; display: none; border: none; }
-    .guide, .user-guide { background: #222; color: #00ffd5; padding: 10px; margin-bottom: 20px; border-radius: 5px; text-align: center; }
-    .thumbnail { display: flex; align-items: center; gap: 10px; }
-    .thumbnail img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
-    .stats { text-align: center; margin-top: 10px; color: #ccc; font-size: 14px; }
-    .skip-container { text-align: center; margin-top: 10px; }
+    body {
+      background: #0f0f0f;
+      color: #00ffe7;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      cursor: none;
+    }
+    .cursor {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #00ffd5;
+      border-radius: 50%;
+      position: fixed;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 9999;
+      transition: 0.1s ease;
+    }
+    .header {
+      text-align: center;
+      font-size: 40px;
+      margin-top: 20px;
+      color: #00ffd5;
+      text-shadow: 0 0 10px #00ffd5;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+    .search-bar {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 15px;
+      font-size: 16px;
+      background: #111;
+      color: #0ff;
+      box-shadow: 0 0 10px #00ffd5;
+    }
+    .link-card {
+      background: #181818;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #00ffd5aa;
+    }
+    .link-card button {
+      background: #00ffd5;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #000;
+      transition: 0.2s;
+    }
+    .link-card button:hover {
+      background: #ff0080;
+      color: #fff;
+    }
+    iframe.video-frame {
+      width: 100%;
+      height: 360px;
+      margin-top: 15px;
+      border: none;
+      display: none;
+      border-radius: 12px;
+    }
+    .guide, .status-box {
+      background: #222;
+      color: #00ffd5;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      text-align: center;
+      box-shadow: 0 0 10px #00ffd5;
+    }
+    .ads {
+      margin-top: 10px;
+      display: none;
+      text-align: center;
+    }
+    .banner-ad {
+      background: #333;
+      padding: 10px;
+      color: #fff;
+      border-radius: 5px;
+      margin-top: 10px;
+      box-shadow: 0 0 10px #ff0080aa;
+    }
+    .skip-button {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .skip-button button {
+      background: #ff0080;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      border: none;
+      color: #fff;
+      box-shadow: 0 0 12px #ff0080aa;
+    }
+    .progress-bar {
+      width: 0%;
+      height: 10px;
+      background: #00ffd5;
+      border-radius: 5px;
+      margin-top: 10px;
+      transition: width 1s linear;
+    }
   </style>
 </head>
 <body>
 
+<!-- Neon Cursor -->
+<div class="cursor" id="cursor"></div>
+
 <div class="header">HiStream</div>
 <div class="container">
   <div class="guide">
-    🎬 Click "Watch Now" to play a video. In-video ads will appear and can be skipped.<br>
-    ✅ Stay on the tab for 20s to skip ads for 30 minutes.<br>
-    ❌ Leaving the tab will reset the process.
+    🎬 Watch videos <br>
+    🧨 Banner + Push + Direct link ads will load while watching.<br>
+    🚀 Click "Skip Ads", wait 20s in tab, ads will stop for 30 minutes.
   </div>
 
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
-
-  <div class="stats" id="statsInfo"></div>
 </div>
 
-<!-- Adsterra Push Notification Script -->
-<script type="text/javascript">
-  (function() {
-    var pushScript = document.createElement('script');
-    pushScript.setAttribute('data-cfasync', 'false');
-    pushScript.src = '//www.profitablegatetocontent.com/bb/0b/9f/bb0b9f75c57864a054fbc1e6971bfcf2.js';
-    document.head.appendChild(pushScript);
-  })();
-</script>
-
 <script>
-  let skipAdMode = false;
-  let skipAdTimeout;
-  let skipCooldown = 1800000; // 30 minutes
-  let visibleIframe = null;
-  let views = 0;
-  let adClicks = 0;
+let skipCooldown = 30 * 60 * 1000;
+let adClicks = 0;
+let views = 0;
+let openedAd = false;
 
-  const videos = [
-    {
-      title: "Funny Cat Compilation",
-      embed: "https://manifest.googlevideo.com/api/manifest/hls_playlist/expire/1751984634/ei/mtVsaPezNNG5mLAP6eGoyQg/ip/103.134.1.57/id/3a3cc712d65f545d/itag/270/source/youtube/requiressl/yes/ratebypass/yes/pfa/1/sgovp/clen%3D10109059%3Bdur%3D117.016%3Bgir%3Dyes%3Bitag%3D137%3Blmt%3D1751137974315826/rqh/1/hls_chunk_host/rr1---sn-ug5onfvgaq-aixs.googlevideo.com/xpc/EgVo2aDSNQ%3D%3D/met/1751963034,/mh/Qq/mm/31,29/mn/sn-ug5onfvgaq-aixs,sn-hju7enll/ms/au,rdu/mv/m/mvi/1/pl/24/rms/au,au/initcwndbps/336250/bui/AY1jyLPk52ynmQO50r05T-otxoxrwctPmPm-2N00jlpC6_thSUaE0M0BSJx8805MdNrB4weXD_9w-zBu/spc/l3OVKXliLsJLtrpUM6pY0cmInomo2aTBlR7mlznMEzUUvU20hUew523cONLXQA/vprv/1/playlist_type/DVR/dover/13/txp/4535534/mt/1751962161/fvip/2/short_key/1/keepalive/yes/sparams/expire,ei,ip,id,itag,source,requiressl,ratebypass,pfa,sgovp,rqh,xpc,bui,spc,vprv,playlist_type/sig/AJfQdSswRQIhANQIU0pYKye219A8ss8Wbw5nABObFJCVeWl4t0QapxPDAiA33XcpVRBmMO3YMXlSyK7r5pxRMYRUjuHqqnCPlIcapQ%3D%3D/lsparams/hls_chunk_host,met,mh,mm,mn,ms,mv,mvi,pl,rms,initcwndbps/lsig/APaTxxMwRQIgEMIa_UCTKtMKzMipTbD8LhmjWeDXcxwk9eTL7RqwA-UCIQCqZ9fZzzPcnIx754sIud2U_2NkD-TfBdxjSUnrHQxSmQ%3D%3D/playlist/index.m3u8",
-      thumbnail: "https://via.placeholder.com/60x60.png?text=Cat",
-      pinned: false
+const videos = [
+  {
+    title: "Drive Video 1",
+    embedDirect: "https://drive.google.com/file/d/1awOfPoNCF/preview",
+    thumbnail: "https://via.placeholder.com/60x60.png?text=Video"
+  }
+];
+
+function renderVideos(list = videos) {
+  const container = document.getElementById("videoList");
+  container.innerHTML = "";
+  list.forEach((vid, i) => {
+    const card = document.createElement("div");
+    card.className = "link-card";
+
+    card.innerHTML = `
+      <div class="thumbnail">
+        <img src="${vid.thumbnail}" width="60" height="60" style="border-radius:8px; vertical-align:middle;"> 
+        <strong>${vid.title}</strong>
+      </div>
+      <button onclick="playVideo(${i}, this)">▶️ Watch Now</button>
+      <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
+      <div class="ads">
+        <div class="banner-ad">🔔 Ad: <a href="https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163" target="_blank" style="color:#0ff;">Special Offer - Click Now</a></div>
+      </div>
+      <div class="skip-button">
+        <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
+        <div class="progress-bar"></div>
+      </div>
+      <div class="status-box"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function playVideo(index, btn) {
+  const card = btn.parentElement;
+  const iframe = card.querySelector("iframe");
+  const adsDiv = card.querySelector(".ads");
+  const skipDiv = card.querySelector(".skip-button");
+  const statusDiv = card.querySelector(".status-box");
+
+  document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
+  document.querySelectorAll(".ads").forEach(d => d.style.display = "none");
+  document.querySelectorAll(".skip-button").forEach(s => s.style.display = "none");
+  document.querySelectorAll(".status-box").forEach(s => s.innerHTML = "");
+
+  if (!iframe.src) iframe.src = iframe.dataset.src;
+  iframe.style.display = "block";
+
+  const now = Date.now();
+  const lastSkip = localStorage.getItem("skipAdUntil");
+
+  if (!lastSkip || now > parseInt(lastSkip)) {
+    adsDiv.style.display = "block";
+    skipDiv.style.display = "block";
+    statusDiv.innerHTML = "";
+
+    // 🧨 Load Push Notification Adsterra JS inside the card
+    if (!card.dataset.pushLoaded) {
+      const s = document.createElement('script');
+      s.src = '//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js';
+      s.setAttribute('data-cfasync','false');
+      document.body.appendChild(s);
+      card.dataset.pushLoaded = true;
     }
-  ];
 
-  function renderVideos(filteredList = videos) {
-    const container = document.getElementById("videoList");
-    container.innerHTML = "";
-
-    filteredList.sort((a, b) => b.pinned - a.pinned).forEach((vid, i) => {
-      const card = document.createElement("div");
-      card.className = "link-card";
-
-      const thumb = document.createElement("div");
-      thumb.className = "thumbnail";
-      thumb.innerHTML = `<img src="${vid.thumbnail}"/><strong>${vid.title}</strong>`;
-
-      const btn = document.createElement("button");
-      btn.textContent = "▶️ Watch Now";
-      btn.onclick = () => openVideo(i, card);
-
-      const pinBtn = document.createElement("button");
-      pinBtn.textContent = vid.pinned ? "Unpin" : "Pin";
-      pinBtn.onclick = () => {
-        vid.pinned = !vid.pinned;
-        renderVideos();
-      };
-
-      const frame = document.createElement("iframe");
-      frame.dataset.src = vid.embed;
-      frame.allowFullscreen = true;
-
-      card.appendChild(thumb);
-      card.appendChild(btn);
-      card.appendChild(pinBtn);
-      card.appendChild(frame);
-      container.appendChild(card);
-    });
-    updateStats();
+    // 🌐 Open Adsterra Direct Link once per view
+    if (!openedAd) {
+      window.open("https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163", "_blank");
+      openedAd = true;
+    }
+  } else {
+    statusDiv.innerHTML = "✅ Ads are skipped (active)";
   }
 
-  function openVideo(index, card) {
-    const frames = document.querySelectorAll("iframe");
-    frames.forEach(f => f.style.display = "none");
+  views++;
+}
 
-    const frame = document.querySelectorAll("iframe")[index];
-    if (!frame.src) frame.src = frame.dataset.src;
-    frame.style.display = "block";
-    visibleIframe = frame;
-    views++;
-    updateStats();
+function startSkipProcess(btn) {
+  const skipDiv = btn.parentElement;
+  const adsDiv = skipDiv.previousElementSibling;
+  const statusDiv = skipDiv.nextElementSibling;
+  const progressBar = skipDiv.querySelector(".progress-bar");
 
-    const skipContainer = document.createElement("div");
-    skipContainer.className = "skip-container";
-    skipContainer.innerHTML = `<button onclick="activateSkipMode()">🚀 Skip Ads (30min)</button>`;
-    card.appendChild(skipContainer);
+  statusDiv.innerHTML = "⏳ Please wait 20 seconds...";
+  progressBar.style.width = "0%";
 
-    if (!skipAdMode) triggerAdPause(frame);
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += 5;
+    progressBar.style.width = progress + "%";
+    if (progress >= 100) {
+      clearInterval(interval);
+      const expireTime = Date.now() + skipCooldown;
+      localStorage.setItem("skipAdUntil", expireTime);
+      adsDiv.style.display = "none";
+      skipDiv.style.display = "none";
+      statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
+    }
+  }, 1000);
+}
+
+function filterVideos(query) {
+  const lower = query.toLowerCase();
+  const filtered = videos.filter(v => v.title.toLowerCase().includes(lower));
+  renderVideos(filtered);
+}
+
+// Glowing Cursor
+const cursor = document.getElementById("cursor");
+document.addEventListener("mousemove", e => {
+  cursor.style.left = e.clientX + "px";
+  cursor.style.top = e.clientY + "px";
+});
+
+// Check skip expiration
+function checkSkipStatus() {
+  const now = Date.now();
+  const lastSkip = localStorage.getItem("skipAdUntil");
+  if (lastSkip && now > parseInt(lastSkip)) {
+    localStorage.removeItem("skipAdUntil");
+    openedAd = false;
   }
+  requestAnimationFrame(checkSkipStatus);
+}
 
-  function triggerAdPause(iframe) {
-    alert("Ad starting... stay here for 15 seconds.");
-    window.open("https://www.profitablegatetocontent.com/4b7a0bb5c2?key=custom_ad_link", "_blank");
-    adClicks++;
-    updateStats();
-    iframe.contentWindow.postMessage('pause', '*');
-
-    setTimeout(() => {
-      if (document.visibilityState === 'visible') {
-        iframe.contentWindow.postMessage('play', '*');
-      } else {
-        alert("Tab switched. Ad restart required.");
-        triggerAdPause(iframe);
-      }
-    }, 15000);
-  }
-
-  function activateSkipMode() {
-    alert("Wait 20 seconds here. Don't leave the tab or it'll restart!");
-    window.open("https://www.profitablegatetocontent.com/redirect_to_ad?key=skip_key", "_blank");
-    adClicks++;
-    updateStats();
-
-    setTimeout(() => {
-      if (document.visibilityState === 'visible') {
-        skipAdMode = true;
-        alert("✅ Ads disabled for 30 minutes!");
-        clearTimeout(skipAdTimeout);
-        skipAdTimeout = setTimeout(() => {
-          skipAdMode = false;
-          alert("🔁 30 min passed. Ads resumed.");
-        }, skipCooldown);
-      } else {
-        alert("❌ You left the tab. Skip failed. Try again.");
-      }
-    }, 20000);
-  }
-
-  function filterVideos(query) {
-    const lower = query.toLowerCase();
-    const filtered = videos.filter(v => v.title.toLowerCase().includes(lower));
-    renderVideos(filtered);
-  }
-
-  function updateStats() {
-    document.getElementById("statsInfo").textContent = `📈 Views: ${views} | 🎯 Ad Clicks: ${adClicks}`;
-  }
-
-  renderVideos();
+checkSkipStatus();
+renderVideos();
 </script>
 </body>
 </html>
