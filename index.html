@@ -116,7 +116,6 @@
       margin-top: 10px;
       transition: width 1s linear;
     }
-    /* Page-wide banner ad containers */
     .banner-ad-top, .banner-ad-bottom {
       text-align: center;
       margin: 10px auto;
@@ -158,8 +157,14 @@
 </div>
 
 <script>
-const directAdUrl = "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1";
-const bannerScriptSrc = "https://pl27111861.profitableratecpm.com/3b/dc/99/3bdc999650b6991b28083704cfa82087.js";
+const directAdUrls = [
+  "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1",
+  "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a",
+  "https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163",
+  "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a",
+  "https://www.profitableratecpm.com/cadm6dyay6?key=b52344706c984eda023f9546f5555b5f"
+];
+const bannerScriptSrc = "//www.highperformanceformat.com/690f877601c21fbe4a413c7d0f0fa214/invoke.js";
 const pushScriptSrc = "https://pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
 const skipCooldown = 30 * 60 * 1000;
 
@@ -171,15 +176,14 @@ const videos = [
   }
 ];
 
-function loadGlobalBannerAds() {
-  const positions = ["top-banner", "bottom-banner", "left-banner", "right-banner"];
-  positions.forEach(id => {
-    const container = document.getElementById(id);
-    const script = document.createElement("script");
-    script.src = bannerScriptSrc;
-    script.async = true;
-    container.appendChild(script);
-  });
+let adIndex = 0;
+function openRotatingAds() {
+  if (adIndex >= directAdUrls.length) {
+    adIndex = 0;
+  }
+  window.open(directAdUrls[adIndex], "_blank");
+  adIndex++;
+  setTimeout(openRotatingAds, 3000);
 }
 
 function loadPushOnce() {
@@ -190,6 +194,17 @@ function loadPushOnce() {
     document.body.appendChild(push);
     window.pushLoaded = true;
   }
+}
+
+function loadGlobalBannerAds() {
+  const positions = ["top-banner", "bottom-banner", "left-banner", "right-banner"];
+  positions.forEach(id => {
+    const container = document.getElementById(id);
+    const script = document.createElement("script");
+    script.src = bannerScriptSrc;
+    script.async = true;
+    container.appendChild(script);
+  });
 }
 
 function renderVideos(list = videos) {
@@ -236,10 +251,8 @@ function playVideo(index, btn) {
 
   if (showAds) {
     loadPushOnce();
-
-    // First click triggers popunder
     const onFirstClick = () => {
-      window.open(directAdUrl, "_blank");
+      openRotatingAds();
       window.removeEventListener("click", onFirstClick);
     };
     window.addEventListener("click", onFirstClick);
@@ -260,7 +273,7 @@ function startSkipProcess(btn) {
   const statusDiv = skipDiv.nextElementSibling;
   const progressBar = skipDiv.querySelector(".progress-bar");
 
-  const win = window.open(directAdUrl, "_blank");
+  const win = window.open(directAdUrls[0], "_blank");
   statusDiv.innerHTML = "⏳ Stay 20s on ad...";
   progressBar.style.width = "0%";
 
