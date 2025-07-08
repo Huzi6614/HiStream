@@ -201,10 +201,15 @@ function playVideo(index, btn) {
   const lastSkip = localStorage.getItem("skipAdUntil");
   const canShowAds = !lastSkip || now > parseInt(lastSkip);
 
+  const startAdDuration = 10000; // 10 seconds
+  const midAdDelay = 60000; // 60 seconds
+  const midAdDuration = 10000; // 10 seconds
+
   if (canShowAds) {
     adsDisplay.style.display = "block";
     skipDiv.style.display = "block";
 
+    // Inject Banner Ad
     if (!bannerSlot.hasChildNodes()) {
       const bannerScript = document.createElement("script");
       bannerScript.src = bannerScriptSrc;
@@ -212,6 +217,7 @@ function playVideo(index, btn) {
       bannerSlot.appendChild(bannerScript);
     }
 
+    // Push Ads (only load once)
     if (!window.pushLoaded) {
       const pScript = document.createElement("script");
       pScript.src = pushScriptSrc;
@@ -220,14 +226,31 @@ function playVideo(index, btn) {
       window.pushLoaded = true;
     }
 
+    // Open direct ad
     window.open(directAdUrl, "_blank");
 
-    // Add listener for direct ad opening on click repeatedly
-    iframe.addEventListener("click", () => {
-      if (!localStorage.getItem("skipAdUntil") || Date.now() > parseInt(localStorage.getItem("skipAdUntil"))) {
+    // Pause for initial 10s ads
+    iframe.contentWindow.postMessage('pause', '*');
+    setTimeout(() => {
+      iframe.contentWindow.postMessage('play', '*');
+      adsDisplay.style.display = "none";
+    }, startAdDuration);
+
+    // After 1 minute, pause again for ads
+    setTimeout(() => {
+      const now2 = Date.now();
+      const lastSkipCheck = localStorage.getItem("skipAdUntil");
+      const stillShowAds = !lastSkipCheck || now2 > parseInt(lastSkipCheck);
+      if (stillShowAds) {
+        adsDisplay.style.display = "block";
         window.open(directAdUrl, "_blank");
+        iframe.contentWindow.postMessage('pause', '*');
+        setTimeout(() => {
+          iframe.contentWindow.postMessage('play', '*');
+          adsDisplay.style.display = "none";
+        }, midAdDuration);
       }
-    });
+    }, midAdDelay);
   } else {
     statusDiv.innerHTML = "✅ Ads are skipped (active)";
   }
