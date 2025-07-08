@@ -206,9 +206,7 @@ function toggleVideo(index, btn) {
   iframe.style.display = "block";
   wrapper.style.display = "block";
 
-  const now = Date.now();
-  const lastSkip = localStorage.getItem("skipAdUntil");
-  const adsActive = !lastSkip || now > parseInt(lastSkip);
+  const adsActive = areAdsEnabled();
 
   if (adsActive) {
     skipDiv.style.display = "block";
@@ -218,6 +216,12 @@ function toggleVideo(index, btn) {
     statusDiv.innerHTML = "✅ Ads skipped (active)";
     statusDiv.style.display = "block";
   }
+}
+
+function areAdsEnabled() {
+  const now = Date.now();
+  const lastSkip = localStorage.getItem("skipAdUntil");
+  return !lastSkip || now > parseInt(lastSkip);
 }
 
 function startSkipProcess(btn) {
@@ -241,6 +245,7 @@ function startSkipProcess(btn) {
       localStorage.setItem("skipAdUntil", Date.now() + 30 * 60 * 1000);
       statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
       skipDiv.style.display = "none";
+      hideAllAds(); // 🚫 Hide banners
     }
   }, 1000);
 
@@ -262,10 +267,15 @@ function filterVideos(query) {
   renderVideos(filtered);
 }
 
+function hideAllAds() {
+  document.querySelectorAll('.banner-ad-top, .banner-ad-bottom').forEach(el => el.style.display = 'none');
+}
+
 let lastAdClickTime = 0;
 const adCooldown = 10 * 1000;
 
 document.body.addEventListener("click", () => {
+  if (!areAdsEnabled()) return; // 🚫 Block direct ad click if ads skipped
   const now = Date.now();
   if (now - lastAdClickTime >= adCooldown) {
     lastAdClickTime = now;
@@ -282,7 +292,11 @@ document.addEventListener("mousemove", e => {
 
 window.onload = () => {
   renderVideos();
+
+  // 🔁 On reload, check if ads are disabled and hide banners
+  if (!areAdsEnabled()) hideAllAds();
 };
 </script>
+
 </body>
 </html>
