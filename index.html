@@ -201,15 +201,22 @@ function playVideo(index, btn) {
   const lastSkip = localStorage.getItem("skipAdUntil");
   const canShowAds = !lastSkip || now > parseInt(lastSkip);
 
-  const startAdDuration = 10000; // 10 seconds
-  const midAdDelay = 60000; // 60 seconds
-  const midAdDuration = 10000; // 10 seconds
+  const startAdDuration = 10000; // 10 sec
+  const midAdDelay = 60000; // 60 sec
+  const midAdDuration = 10000; // 10 sec
+
+  // Function to pause and resume video
+  function pauseVideo() {
+    try { iframe.contentWindow.postMessage('pause', '*'); } catch {}
+  }
+  function playVideoAgain() {
+    try { iframe.contentWindow.postMessage('play', '*'); } catch {}
+  }
 
   if (canShowAds) {
     adsDisplay.style.display = "block";
     skipDiv.style.display = "block";
 
-    // Inject Banner Ad
     if (!bannerSlot.hasChildNodes()) {
       const bannerScript = document.createElement("script");
       bannerScript.src = bannerScriptSrc;
@@ -217,7 +224,6 @@ function playVideo(index, btn) {
       bannerSlot.appendChild(bannerScript);
     }
 
-    // Push Ads (only load once)
     if (!window.pushLoaded) {
       const pScript = document.createElement("script");
       pScript.src = pushScriptSrc;
@@ -226,36 +232,41 @@ function playVideo(index, btn) {
       window.pushLoaded = true;
     }
 
-    // Open direct ad
     window.open(directAdUrl, "_blank");
 
-    // Pause for initial 10s ads
-    iframe.contentWindow.postMessage('pause', '*');
+    // Initial 10 sec ad
+    pauseVideo();
     setTimeout(() => {
-      iframe.contentWindow.postMessage('play', '*');
       adsDisplay.style.display = "none";
+      playVideoAgain();
     }, startAdDuration);
 
-    // After 1 minute, pause again for ads
+    // Mid 1-minute ad
     setTimeout(() => {
-      const now2 = Date.now();
-      const lastSkipCheck = localStorage.getItem("skipAdUntil");
-      const stillShowAds = !lastSkipCheck || now2 > parseInt(lastSkipCheck);
+      const lastSkip2 = localStorage.getItem("skipAdUntil");
+      const stillShowAds = !lastSkip2 || Date.now() > parseInt(lastSkip2);
       if (stillShowAds) {
         adsDisplay.style.display = "block";
         window.open(directAdUrl, "_blank");
-        iframe.contentWindow.postMessage('pause', '*');
+        pauseVideo();
         setTimeout(() => {
-          iframe.contentWindow.postMessage('play', '*');
           adsDisplay.style.display = "none";
+          playVideoAgain();
         }, midAdDuration);
       }
     }, midAdDelay);
   } else {
     statusDiv.innerHTML = "✅ Ads are skipped (active)";
   }
-}
 
+  // Show ads also in fullscreen
+  document.addEventListener('fullscreenchange', () => {
+    const fsElement = document.fullscreenElement;
+    if (fsElement && fsElement.contains(iframe)) {
+      adsDisplay.style.display = "block";
+    }
+  });
+}
 function startSkipProcess(btn) {
   const skipDiv = btn.parentElement;
   const statusDiv = skipDiv.nextElementSibling;
