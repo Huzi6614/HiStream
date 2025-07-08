@@ -144,14 +144,19 @@
 <script>
 let skipCooldown = 30 * 60 * 1000;
 const directAdUrl = "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1";  
-const bannerScriptSrc = "pl27111861.profitableratecpm.com/3b/dc/99/3bdc999650b6991b28083704cfa82087.js";  
+const bannerScriptSrc = "//pl27111861.profitableratecpm.com/3b/dc/99/3bdc999650b6991b28083704cfa82087.js";  
 const pushScriptSrc = "//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
 
 const videos = [
   {
-    title: "The family star Hindi",
+    title: "The Family Star Hindi",
     embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
     thumbnail: "https://assets-in.bmscdn.com/iedb/movies/images/mobile/thumbnail/xlarge/the-family-star-et00373701-1711976553.jpg"
+  },
+  {
+    title: "Animal Hindi",
+    embedDirect: "https://drive.google.com/file/d/1XdqsI1XsCEpVIXQKue8LS1NvXbnKrYqU/preview",
+    thumbnail: "https://i.ytimg.com/vi/6mds7zA3lNs/hqdefault.jpg"
   }
 ];
 
@@ -231,7 +236,6 @@ function showAdIrritant(iframe, adsDisplay, bannerSlot, skipDiv) {
 
   try { iframe.contentWindow.postMessage('pause', '*'); } catch {}
 
-  // Open direct ad once on user interaction (if popup not blocked)
   const onFirstClick = () => {
     window.open(directAdUrl, "_blank");
     window.removeEventListener("click", onFirstClick);
@@ -241,7 +245,7 @@ function showAdIrritant(iframe, adsDisplay, bannerSlot, skipDiv) {
   setTimeout(() => {
     adsDisplay.style.display = "none";
     try { iframe.contentWindow.postMessage('play', '*'); } catch {}
-  }, 20000); // 20 sec ad pause
+  }, 20000); // 20 sec
 }
 
 function startSkipProcess(btn) {
