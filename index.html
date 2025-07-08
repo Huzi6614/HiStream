@@ -5,7 +5,6 @@
   <title>HiStream</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* ... (No changes to your CSS. Keeping everything intact) ... */
     body {
       background: #0f0f0f;
       color: #00ffe7;
@@ -134,27 +133,12 @@
     iframe {
       border: none;
     }
-    .direct-link-btn {
-      background: #0080ff;
-      color: white;
-      border: none;
-      margin-top: 8px;
-      padding: 8px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    .direct-link-btn:hover {
-      background: #005bb5;
-    }
   </style>
 </head>
 <body>
 <div class="cursor" id="cursor"></div>
 
-<!-- Banner Ads: Top, Bottom, Left, Right -->
+<!-- Banner Ads -->
 <div class="banner-ad-top" id="top-banner"></div>
 <div class="banner-ad-bottom" id="bottom-banner"></div>
 <div class="banner-ad-left" id="left-banner"></div>
@@ -164,9 +148,9 @@
 <div class="container">
   <div class="guide">
     🎥 Ads will be open on new tab - see them and come back<br>
-    🚀 Click "Skip Ads" → stay 20s on ad page → All ads off for 30 min.<br>
+    🚀 Click anywhere → stay 20s on ad page → All ads off for 30 min.<br>
     ❌ Leave early = no skip.<br>
-    Tell or comment us on TikTok , Insta and Facebook to add your fav movies and also follow us to support this program.
+    Follow on TikTok, Insta, and Facebook & comment your fav shows!
   </div>
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
@@ -177,13 +161,12 @@ const directAdUrls = [
   "https://www.profitableratecpm.com/i08tb7ztk?key=dc81cf5999e25395bd59ebffcc4962b1",
   "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a",
   "https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163",
-  "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a",
   "https://www.profitableratecpm.com/cadm6dyay6?key=b52344706c984eda023f9546f5555b5f"
 ];
 
 const bannerScriptSrc = "//www.highperformanceformat.com/690f877601c21fbe4a413c7d0f0fa214/invoke.js";
 const pushScriptSrc = "https://pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
-const skipCooldown = 30 * 60 * 1000; // 30 minutes
+const skipCooldown = 30 * 60 * 1000;
 
 const videos = [
   {
@@ -199,50 +182,7 @@ const videos = [
 ];
 
 let adIndex = 0;
-
-function openRotatingAds() {
-  if (adIndex >= directAdUrls.length) adIndex = 0;
-  window.open(directAdUrls[adIndex], "_blank");
-  adIndex++;
-  setTimeout(openRotatingAds, 3000);
-}
-
-function loadPushOnce() {
-  if (!window.pushLoaded) {
-    const push = document.createElement("script");
-    push.src = pushScriptSrc;
-    push.setAttribute("data-cfasync", "false");
-    document.body.appendChild(push);
-    window.pushLoaded = true;
-  }
-}
-
-// ✅ FIXED: Now includes `atOptions` before loading banner ad script
-function loadGlobalBannerAds() {
-  const positions = ["top-banner", "bottom-banner", "left-banner", "right-banner"];
-  positions.forEach(id => {
-    const container = document.getElementById(id);
-    
-    // Inject atOptions first
-    const config = document.createElement("script");
-    config.innerHTML = `
-      atOptions = {
-        'key': '690f877601c21fbe4a413c7d0f0fa214',
-        'format': 'iframe',
-        'height': 600,
-        'width': 160,
-        'params': {}
-      };
-    `;
-    container.appendChild(config);
-
-    // Then load the ad script
-    const script = document.createElement("script");
-    script.src = bannerScriptSrc;
-    script.async = true;
-    container.appendChild(script);
-  });
-}
+let pushInterval;
 
 function renderVideos(list = videos) {
   const container = document.getElementById("videoList");
@@ -252,7 +192,6 @@ function renderVideos(list = videos) {
     card.className = "link-card";
     card.innerHTML = `
       <button onclick="toggleVideo(${i}, this)">▶️ ${vid.title}</button>
-      <button class="direct-link-btn" onclick="openDirectAd()">Open Ad / Direct Link</button>
       <div class="video-wrapper">
         <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
       </div>
@@ -282,9 +221,9 @@ function toggleVideo(index, btn) {
 
   const now = Date.now();
   const lastSkip = localStorage.getItem("skipAdUntil");
-  const adsAreActive = !lastSkip || now > parseInt(lastSkip);
+  const adsActive = !lastSkip || now > parseInt(lastSkip);
 
-  if (adsAreActive) {
+  if (adsActive) {
     skipDiv.style.display = "block";
     statusDiv.style.display = "none";
   } else {
@@ -330,28 +269,57 @@ function startSkipProcess(btn) {
   }, 500);
 }
 
-function openDirectAd() {
-  const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
-  window.open(adUrl, "_blank");
-}
-
 function filterVideos(query) {
   const lower = query.toLowerCase();
   const filtered = videos.filter(v => v.title.toLowerCase().includes(lower));
   renderVideos(filtered);
 }
 
+function loadGlobalBannerAds() {
+  ["top-banner", "bottom-banner", "left-banner", "right-banner"].forEach(id => {
+    const container = document.getElementById(id);
+    const script = document.createElement("script");
+    script.src = bannerScriptSrc;
+    script.async = true;
+    container.appendChild(script);
+  });
+}
+
+function loadPushRepeatedly() {
+  if (!window.pushLoaded) {
+    window.pushLoaded = true;
+    pushInterval = setInterval(() => {
+      const push = document.createElement("script");
+      push.src = pushScriptSrc;
+      push.setAttribute("data-cfasync", "false");
+      document.body.appendChild(push);
+    }, 10000); // every 10 seconds
+  }
+}
+
+// --- AD LAUNCH LOOP ON ANY CLICK ---
+document.body.addEventListener("click", () => {
+  const adUrl = directAdUrls[adIndex % directAdUrls.length];
+  adIndex++;
+  window.open(adUrl, "_blank");
+
+  setTimeout(() => {
+    window.location.reload();
+  }, 5000);
+});
+
+// Cursor movement
 document.addEventListener("mousemove", e => {
   const cursor = document.getElementById("cursor");
   cursor.style.left = e.clientX + "px";
   cursor.style.top = e.clientY + "px";
 });
 
+// Load on page
 window.onload = () => {
   renderVideos();
   loadGlobalBannerAds();
-  loadPushOnce();
-  // openRotatingAds(); // optional
+  loadPushRepeatedly();
 };
 </script>
 </body>
