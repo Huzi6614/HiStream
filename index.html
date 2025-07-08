@@ -5,6 +5,7 @@
   <title>HiStream</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* Your original CSS — unchanged */
     body {
       background: #0f0f0f;
       color: #00ffe7;
@@ -156,17 +157,17 @@ const videos = [
   {
     title: "Squid game Season 3 hindi",
     embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
-    thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMZDnPVGO0fEtHuJx55QQeyyqF_-Ih8cNsKA&s"
+    thumbnail: ""
   },
   {
     title: "Ballerina Hindi dub",
     embedDirect: "https://drive.google.com/file/d/1UpdH0p1LmevhWtyxCsFMXrKpFZJVDaCz/preview",
-    thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQQ_tWXM4NRWayCHlCgFJrT9r2rjNNpQEXxw&s"
+    thumbnail: ""
   },
   {
     title: "The family star Hindi",
     embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
-    thumbnail: "https://upload.wikimedia.org/wikipedia/en/1/1d/Family_Star_Poster.png"
+    thumbnail: ""
   }
 ];
 
@@ -262,11 +263,11 @@ function filterVideos(query) {
 }
 
 let lastAdClickTime = 0;
-const adCooldown = 10000;
+const adCooldown = 10 * 1000;
 
 document.body.addEventListener("click", () => {
   const now = Date.now();
-  if (now - lastAdClickTime > adCooldown) {
+  if (now - lastAdClickTime >= adCooldown) {
     lastAdClickTime = now;
     const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
     window.open(adUrl, "_blank");
