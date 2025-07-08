@@ -86,17 +86,7 @@
       box-shadow: 0 0 10px #00ffd5;
     }
     .ads {
-      margin-top: 10px;
       display: none;
-      text-align: center;
-    }
-    .banner-ad {
-      background: #333;
-      padding: 10px;
-      color: #fff;
-      border-radius: 5px;
-      margin-top: 10px;
-      box-shadow: 0 0 10px #ff0080aa;
     }
     .skip-button {
       display: none;
@@ -120,35 +110,45 @@
       margin-top: 10px;
       transition: width 1s linear;
     }
+    .invideo-ads {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
 
-<!-- Neon Cursor -->
 <div class="cursor" id="cursor"></div>
-
 <div class="header">HiStream</div>
 <div class="container">
   <div class="guide">
-    🎬 Watch videos <br>
-    🧨 Banner + Push + Direct link ads will load while watching.<br>
-    🚀 Click "Skip Ads", wait 20s in tab, ads will stop for 30 minutes.
+    🎥 All Ads play inside the video .<br>
+    🚀 Click "Skip Ads" → stay 20s on direct-link → Ads disabled for 30 minutes.<br>
+    ❌ Returning early cancels skipping.
   </div>
-
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
 </div>
 
 <script>
 let skipCooldown = 30 * 60 * 1000;
-let adClicks = 0;
-let views = 0;
-let openedAd = false;
+let lastAdTime = 0;
+const adInterval = 2 * 60 * 1000; // 2 minutes
+const directAdUrl = "https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163";
+const bannerScriptSrc = "//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js";
+const pushScriptSrc = '/pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js';
 
 const videos = [
   {
-    title: "Drive Video 1",
-    embedDirect: "https://drive.google.com/file/d/1awOfPoNCF/preview",
+    title: "Sample Drive Video",
+    embedDirect: "https://drive.google.com/file/d/YOUR_VIDEO_ID/preview",
     thumbnail: "https://via.placeholder.com/60x60.png?text=Video"
   }
 ];
@@ -159,16 +159,15 @@ function renderVideos(list = videos) {
   list.forEach((vid, i) => {
     const card = document.createElement("div");
     card.className = "link-card";
-
     card.innerHTML = `
       <div class="thumbnail">
         <img src="${vid.thumbnail}" width="60" height="60" style="border-radius:8px; vertical-align:middle;"> 
         <strong>${vid.title}</strong>
       </div>
       <button onclick="playVideo(${i}, this)">▶️ Watch Now</button>
-      <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
-      <div class="ads">
-        <div class="banner-ad">🔔 Ad: <a href="https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163" target="_blank" style="color:#0ff;">Special Offer - Click Now</a></div>
+      <div style="position:relative">
+        <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
+        <div class="invideo-ads" id="ads-${i}" style="display:none">Loading ads...</div>
       </div>
       <div class="skip-button">
         <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
@@ -183,12 +182,12 @@ function renderVideos(list = videos) {
 function playVideo(index, btn) {
   const card = btn.parentElement;
   const iframe = card.querySelector("iframe");
-  const adsDiv = card.querySelector(".ads");
+  const adsDisplay = card.querySelector(".invideo-ads");
   const skipDiv = card.querySelector(".skip-button");
   const statusDiv = card.querySelector(".status-box");
 
   document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
-  document.querySelectorAll(".ads").forEach(d => d.style.display = "none");
+  document.querySelectorAll(".invideo-ads").forEach(d => d.style.display = "none");
   document.querySelectorAll(".skip-button").forEach(s => s.style.display = "none");
   document.querySelectorAll(".status-box").forEach(s => s.innerHTML = "");
 
@@ -197,55 +196,73 @@ function playVideo(index, btn) {
 
   const now = Date.now();
   const lastSkip = localStorage.getItem("skipAdUntil");
+  const canShowAds = !lastSkip || now > parseInt(lastSkip);
 
-  if (!lastSkip || now > parseInt(lastSkip)) {
-    adsDiv.style.display = "block";
+  if (canShowAds) {
+    adsDisplay.style.display = "block";
     skipDiv.style.display = "block";
-    statusDiv.innerHTML = "";
-
-    // 🧨 Load Push Notification Adsterra JS inside the card
-    if (!card.dataset.pushLoaded) {
-      const s = document.createElement('script');
-      s.src = '//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js';
-      s.setAttribute('data-cfasync','false');
-      document.body.appendChild(s);
-      card.dataset.pushLoaded = true;
-    }
-
-    // 🌐 Open Adsterra Direct Link once per view
-    if (!openedAd) {
-      window.open("https://www.profitableratecpm.com/qh3miwshwg?key=cc3ef006b5cae0bd96babac49d5f0163", "_blank");
-      openedAd = true;
-    }
+    adsDisplay.textContent = "🎯 Ads Running...";
+    runInVideoAds(adsDisplay);
   } else {
     statusDiv.innerHTML = "✅ Ads are skipped (active)";
   }
+}
 
-  views++;
+function runInVideoAds(container) {
+  container.textContent = "🎯 Showing banner, push & direct ads...";
+  if (!window.bannerLoaded) {
+    const bScript = document.createElement('script');
+    bScript.src = bannerScriptSrc;
+    bScript.async = true;
+    document.body.appendChild(bScript);
+    window.bannerLoaded = true;
+  }
+  if (!window.pushLoaded) {
+    const pScript = document.createElement('script');
+    pScript.src = pushScriptSrc;
+    pScript.setAttribute("data-cfasync", "false");
+    document.body.appendChild(pScript);
+    window.pushLoaded = true;
+  }
+
+  setInterval(() => {
+    const lastSkip = localStorage.getItem("skipAdUntil");
+    if (!lastSkip || Date.now() > parseInt(lastSkip)) {
+      window.open(directAdUrl, "_blank");
+    }
+  }, adInterval);
 }
 
 function startSkipProcess(btn) {
   const skipDiv = btn.parentElement;
-  const adsDiv = skipDiv.previousElementSibling;
   const statusDiv = skipDiv.nextElementSibling;
   const progressBar = skipDiv.querySelector(".progress-bar");
 
-  statusDiv.innerHTML = "⏳ Please wait 20 seconds...";
+  const skipWindow = window.open(directAdUrl, "_blank");
+  statusDiv.innerHTML = "⏳ Stay 20s on the opened ad page...";
   progressBar.style.width = "0%";
 
-  let progress = 0;
-  const interval = setInterval(() => {
-    progress += 5;
-    progressBar.style.width = progress + "%";
-    if (progress >= 100) {
-      clearInterval(interval);
-      const expireTime = Date.now() + skipCooldown;
-      localStorage.setItem("skipAdUntil", expireTime);
-      adsDiv.style.display = "none";
-      skipDiv.style.display = "none";
+  let elapsed = 0;
+  const timer = setInterval(() => {
+    elapsed++;
+    progressBar.style.width = (elapsed * 5) + "%";
+    if (elapsed >= 20) {
+      clearInterval(timer);
+      localStorage.setItem("skipAdUntil", Date.now() + skipCooldown);
       statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
+      document.querySelectorAll(".invideo-ads").forEach(d => d.style.display = "none");
+      document.querySelectorAll(".skip-button").forEach(d => d.style.display = "none");
     }
   }, 1000);
+
+  const checker = setInterval(() => {
+    if (skipWindow.closed) {
+      clearInterval(timer);
+      clearInterval(checker);
+      statusDiv.innerHTML = "❌ You returned too early. Try again.";
+      progressBar.style.width = "0%";
+    }
+  }, 500);
 }
 
 function filterVideos(query) {
@@ -254,25 +271,12 @@ function filterVideos(query) {
   renderVideos(filtered);
 }
 
-// Glowing Cursor
 const cursor = document.getElementById("cursor");
 document.addEventListener("mousemove", e => {
   cursor.style.left = e.clientX + "px";
   cursor.style.top = e.clientY + "px";
 });
 
-// Check skip expiration
-function checkSkipStatus() {
-  const now = Date.now();
-  const lastSkip = localStorage.getItem("skipAdUntil");
-  if (lastSkip && now > parseInt(lastSkip)) {
-    localStorage.removeItem("skipAdUntil");
-    openedAd = false;
-  }
-  requestAnimationFrame(checkSkipStatus);
-}
-
-checkSkipStatus();
 renderVideos();
 </script>
 </body>
