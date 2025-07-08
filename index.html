@@ -5,6 +5,7 @@
   <title>HiStream</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* ... (No changes to your CSS. Keeping everything intact) ... */
     body {
       background: #0f0f0f;
       color: #00ffe7;
@@ -179,6 +180,7 @@ const directAdUrls = [
   "https://www.profitableratecpm.com/qeg5s1cc?key=b61b9d6aa94bdac53fa6edcf1801a07a",
   "https://www.profitableratecpm.com/cadm6dyay6?key=b52344706c984eda023f9546f5555b5f"
 ];
+
 const bannerScriptSrc = "//www.highperformanceformat.com/690f877601c21fbe4a413c7d0f0fa214/invoke.js";
 const pushScriptSrc = "https://pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
 const skipCooldown = 30 * 60 * 1000; // 30 minutes
@@ -199,9 +201,7 @@ const videos = [
 let adIndex = 0;
 
 function openRotatingAds() {
-  if (adIndex >= directAdUrls.length) {
-    adIndex = 0;
-  }
+  if (adIndex >= directAdUrls.length) adIndex = 0;
   window.open(directAdUrls[adIndex], "_blank");
   adIndex++;
   setTimeout(openRotatingAds, 3000);
@@ -217,10 +217,26 @@ function loadPushOnce() {
   }
 }
 
+// ✅ FIXED: Now includes `atOptions` before loading banner ad script
 function loadGlobalBannerAds() {
   const positions = ["top-banner", "bottom-banner", "left-banner", "right-banner"];
   positions.forEach(id => {
     const container = document.getElementById(id);
+    
+    // Inject atOptions first
+    const config = document.createElement("script");
+    config.innerHTML = `
+      atOptions = {
+        'key': '690f877601c21fbe4a413c7d0f0fa214',
+        'format': 'iframe',
+        'height': 600,
+        'width': 160,
+        'params': {}
+      };
+    `;
+    container.appendChild(config);
+
+    // Then load the ad script
     const script = document.createElement("script");
     script.src = bannerScriptSrc;
     script.async = true;
@@ -257,16 +273,13 @@ function toggleVideo(index, btn) {
   const skipDiv = card.querySelector(".skip-button");
   const statusDiv = card.querySelector(".status-box");
 
-  // Hide all other videos and controls
   document.querySelectorAll(".video-wrapper, .skip-button, .status-box").forEach(el => el.style.display = "none");
   document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
 
-  // Show current video and controls
   if (!iframe.src) iframe.src = iframe.dataset.src;
   iframe.style.display = "block";
   wrapper.style.display = "block";
 
-  // Check if ads can be skipped
   const now = Date.now();
   const lastSkip = localStorage.getItem("skipAdUntil");
   const adsAreActive = !lastSkip || now > parseInt(lastSkip);
@@ -286,7 +299,6 @@ function startSkipProcess(btn) {
   const statusDiv = skipDiv.nextElementSibling;
   const progressBar = skipDiv.querySelector(".progress-bar");
 
-  // Open ad in new tab (random direct ad URL)
   const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
   const adWindow = window.open(adUrl, "_blank");
 
@@ -319,7 +331,6 @@ function startSkipProcess(btn) {
 }
 
 function openDirectAd() {
-  // Open a random direct ad link in a new tab
   const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
   window.open(adUrl, "_blank");
 }
@@ -336,15 +347,12 @@ document.addEventListener("mousemove", e => {
   cursor.style.top = e.clientY + "px";
 });
 
-// Load everything on page load
 window.onload = () => {
   renderVideos();
   loadGlobalBannerAds();
   loadPushOnce();
-  // Uncomment next line to automatically open rotating ads in background tabs every 3 seconds
-  // openRotatingAds();
+  // openRotatingAds(); // optional
 };
-
 </script>
 </body>
 </html>
