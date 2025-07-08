@@ -77,11 +77,11 @@
     .skip-button,
     .status-box {
       display: none;
+      margin-top: 10px;
     }
     .video-wrapper {
       width: 100%;
       height: 360px;
-      margin-top: 15px;
     }
     iframe.video-frame {
       width: 100%;
@@ -130,6 +130,9 @@
     }
     .banner-ad-left { left: 0; }
     .banner-ad-right { right: 0; }
+    iframe {
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -237,17 +240,86 @@ function toggleVideo(index, btn) {
   const skipDiv = card.querySelector(".skip-button");
   const statusDiv = card.querySelector(".status-box");
 
-  // Hide all others
+  // Hide all other videos and controls
   document.querySelectorAll(".video-wrapper, .skip-button, .status-box").forEach(el => el.style.display = "none");
   document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
 
-  // Show current
+  // Show current video and controls
   if (!iframe.src) iframe.src = iframe.dataset.src;
   iframe.style.display = "block";
   wrapper.style.display = "block";
 
+  // Check if ads can be skipped
   const now = Date.now();
   const lastSkip = localStorage.getItem("skipAdUntil");
-  const showAds = !lastSkip || now > parseInt(lastSkip);
+  const adsAreActive = !lastSkip || now > parseInt(lastSkip);
 
-  if (showAds
+  if (adsAreActive) {
+    skipDiv.style.display = "block";
+    statusDiv.style.display = "none";
+  } else {
+    skipDiv.style.display = "none";
+    statusDiv.innerHTML = "✅ Ads skipped (active)";
+    statusDiv.style.display = "block";
+  }
+}
+
+function startSkipProcess(btn) {
+  const skipDiv = btn.parentElement;
+  const statusDiv = skipDiv.nextElementSibling;
+  const progressBar = skipDiv.querySelector(".progress-bar");
+
+  // Open ad in new tab (rotate ads)
+  const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
+  const adWindow = window.open(adUrl, "_blank");
+
+  statusDiv.innerHTML = "⏳ Stay 20s on ad...";
+  statusDiv.style.display = "block";
+  progressBar.style.width = "0%";
+
+  let elapsed = 0;
+  const timer = setInterval(() => {
+    elapsed++;
+    progressBar.style.width = (elapsed * 5) + "%";
+    if (elapsed >= 20) {
+      clearInterval(timer);
+      localStorage.setItem("skipAdUntil", Date.now() + skipCooldown);
+      statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
+      skipDiv.style.display = "none";
+    }
+  }, 1000);
+
+  const checker = setInterval(() => {
+    if (adWindow.closed) {
+      clearInterval(timer);
+      clearInterval(checker);
+      if (elapsed < 20) {
+        statusDiv.innerHTML = "❌ You returned early. Try again.";
+        progressBar.style.width = "0%";
+      }
+    }
+  }, 500);
+}
+
+function filterVideos(query) {
+  const lower = query.toLowerCase();
+  const filtered = videos.filter(v => v.title.toLowerCase().includes(lower));
+  renderVideos(filtered);
+}
+
+document.addEventListener("mousemove", e => {
+  const cursor = document.getElementById("cursor");
+  cursor.style.left = e.clientX + "px";
+  cursor.style.top = e.clientY + "px";
+});
+
+// Load everything on page load
+window.onload = () => {
+  renderVideos();
+  loadGlobalBannerAds();
+  loadPushOnce();
+};
+
+</script>
+</body>
+</html>
