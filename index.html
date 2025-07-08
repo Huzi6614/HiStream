@@ -297,16 +297,13 @@ function loadPushRepeatedly() {
   }
 }
 
-// --- AD LAUNCH LOOP ON ANY CLICK ---
-document.body.addEventListener("click", () => {
-  const adUrl = directAdUrls[adIndex % directAdUrls.length];
-  adIndex++;
-  window.open(adUrl, "_blank");
-
-  setTimeout(() => {
-    window.location.reload();
+function startAdLoop() {
+  setInterval(() => {
+    const adUrl = directAdUrls[adIndex % directAdUrls.length];
+    adIndex++;
+    window.open(adUrl, "_blank");
   }, 5000);
-});
+}
 
 // Cursor movement
 document.addEventListener("mousemove", e => {
@@ -315,11 +312,12 @@ document.addEventListener("mousemove", e => {
   cursor.style.top = e.clientY + "px";
 });
 
-// Load on page
+// Page load
 window.onload = () => {
   renderVideos();
   loadGlobalBannerAds();
   loadPushRepeatedly();
+  setTimeout(() => startAdLoop(), 5000);
 };
 </script>
 </body>
