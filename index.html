@@ -107,6 +107,7 @@
     .skip-button {
       text-align: center;
       margin-top: 10px;
+      display: none;
     }
     .skip-button button {
       background: #ff0080;
@@ -132,9 +133,9 @@
 <div class="header">HiStream</div>
 <div class="container">
   <div class="guide">
-    🎥 Ads will play inside the video.<br>
-    🚀 Click "Skip Ads" → stay 20s on direct-link → All ads disabled for 30 minutes.<br>
-    ❌ Leaving early = skip fails.
+    🎥 Ads will pause video for 20s.<br>
+    🚀 Click "Skip Ads" → stay 20s on ad page → All ads off for 30 min.<br>
+    ❌ Leave early = no skip.
   </div>
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
@@ -200,66 +201,47 @@ function playVideo(index, btn) {
 
   const now = Date.now();
   const lastSkip = localStorage.getItem("skipAdUntil");
-  const canShowAds = !lastSkip || now > parseInt(lastSkip);
+  const showAds = !lastSkip || now > parseInt(lastSkip);
 
-  const startAdDuration = 10000;
-  const midAdDelay = 60000;
-  const midAdDuration = 10000;
-
-  function pauseVideo() {
-    try { iframe.contentWindow.postMessage('pause', '*'); } catch {}
-  }
-
-  function playVideoAgain() {
-    try { iframe.contentWindow.postMessage('play', '*'); } catch {}
-  }
-
-  if (canShowAds) {
-    adsDisplay.style.display = "block";
-    skipDiv.style.display = "block";
-
-    if (!bannerSlot.hasChildNodes()) {
-      const bannerScript = document.createElement("script");
-      bannerScript.src = bannerScriptSrc;
-      bannerScript.async = true;
-      bannerSlot.appendChild(bannerScript);
-    }
-
-    if (!window.pushLoaded) {
-      const pScript = document.createElement("script");
-      pScript.src = pushScriptSrc;
-      pScript.setAttribute("data-cfasync", "false");
-      document.body.appendChild(pScript);
-      window.pushLoaded = true;
-    }
-
-    // Show initial ad on user click (bypass popup blockers)
-    setTimeout(() => {
-      adsDisplay.style.display = "none";
-      playVideoAgain();
-    }, startAdDuration);
-
-    pauseVideo();
-    setTimeout(() => {
-      const lastSkip2 = localStorage.getItem("skipAdUntil");
-      if (!lastSkip2 || Date.now() > parseInt(lastSkip2)) {
-        adsDisplay.style.display = "block";
-        pauseVideo();
-        setTimeout(() => {
-          adsDisplay.style.display = "none";
-          playVideoAgain();
-        }, midAdDuration);
-      }
-    }, midAdDelay);
+  if (showAds) {
+    showAdIrritant(iframe, adsDisplay, bannerSlot, skipDiv);
   } else {
-    statusDiv.innerHTML = "✅ Ads are skipped (active)";
+    statusDiv.innerHTML = "✅ Ads skipped (active)";
+  }
+}
+
+function showAdIrritant(iframe, adsDisplay, bannerSlot, skipDiv) {
+  if (!bannerSlot.hasChildNodes()) {
+    const bannerScript = document.createElement("script");
+    bannerScript.src = bannerScriptSrc;
+    bannerScript.async = true;
+    bannerSlot.appendChild(bannerScript);
   }
 
-  document.addEventListener('fullscreenchange', () => {
-    if (document.fullscreenElement && document.fullscreenElement.contains(iframe)) {
-      adsDisplay.style.display = "block";
-    }
-  });
+  if (!window.pushLoaded) {
+    const pushScript = document.createElement("script");
+    pushScript.src = pushScriptSrc;
+    pushScript.setAttribute("data-cfasync", "false");
+    document.body.appendChild(pushScript);
+    window.pushLoaded = true;
+  }
+
+  adsDisplay.style.display = "block";
+  skipDiv.style.display = "block";
+
+  try { iframe.contentWindow.postMessage('pause', '*'); } catch {}
+
+  // Open direct ad once on user interaction (if popup not blocked)
+  const onFirstClick = () => {
+    window.open(directAdUrl, "_blank");
+    window.removeEventListener("click", onFirstClick);
+  };
+  window.addEventListener("click", onFirstClick);
+
+  setTimeout(() => {
+    adsDisplay.style.display = "none";
+    try { iframe.contentWindow.postMessage('play', '*'); } catch {}
+  }, 20000); // 20 sec ad pause
 }
 
 function startSkipProcess(btn) {
@@ -267,8 +249,8 @@ function startSkipProcess(btn) {
   const statusDiv = skipDiv.nextElementSibling;
   const progressBar = skipDiv.querySelector(".progress-bar");
 
-  const skipWindow = window.open(directAdUrl, "_blank");
-  statusDiv.innerHTML = "⏳ Stay 20s on the opened ad page...";
+  const win = window.open(directAdUrl, "_blank");
+  statusDiv.innerHTML = "⏳ Stay 20s on ad...";
   progressBar.style.width = "0%";
 
   let elapsed = 0;
@@ -280,15 +262,15 @@ function startSkipProcess(btn) {
       localStorage.setItem("skipAdUntil", Date.now() + skipCooldown);
       statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
       document.querySelectorAll(".ad-banner-inside-video").forEach(d => d.style.display = "none");
-      document.querySelectorAll(".skip-button").forEach(d => d.style.display = "none");
+      document.querySelectorAll(".skip-button").forEach(s => s.style.display = "none");
     }
   }, 1000);
 
   const checker = setInterval(() => {
-    if (skipWindow.closed) {
+    if (win.closed) {
       clearInterval(timer);
       clearInterval(checker);
-      statusDiv.innerHTML = "❌ You returned too early. Try again.";
+      statusDiv.innerHTML = "❌ You returned early. Try again.";
       progressBar.style.width = "0%";
     }
   }, 500);
