@@ -85,12 +85,23 @@
     .video-wrapper {
       width: 100%;
       height: 360px;
+      position: relative;
     }
     iframe.video-frame {
       width: 100%;
       height: 100%;
       border: none;
       border-radius: 12px;
+      z-index: 1;
+    }
+    .overlay-click {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 2;
     }
     .skip-button button {
       background: #ff0080;
@@ -124,18 +135,24 @@
       margin: 10px auto;
     }
   </style>
+
+  <!-- ✅ Push Ads Script -->
+  <script>
+    window.addEventListener("load", function () {
+      const pushAdScript = document.createElement("script");
+      pushAdScript.setAttribute("data-cfasync", "false");
+      pushAdScript.src = "//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/push.js";
+      pushAdScript.async = true;
+      document.body.appendChild(pushAdScript);
+    });
+  </script>
 </head>
 <body>
 <div class="cursor" id="cursor"></div>
 
 <div class="banner-ad-top">
   <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-top"></div>
-</div>
-
-<div class="banner-ad-bottom">
-  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-bottom"></div>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
 </div>
 
 <div class="header">HiStream</div>
@@ -148,6 +165,11 @@
   </div>
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
+</div>
+
+<div class="banner-ad-bottom">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-bottom"></div>
 </div>
 
 <script>
@@ -181,19 +203,20 @@ function renderVideos(list = videos) {
     const card = document.createElement("div");
     card.className = "link-card";
     card.innerHTML = `
-  <button onclick="toggleVideo(${i}, this)">
-    <img src="${vid.thumbnail}" alt="${vid.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">
-    <span>${vid.title}</span>
-  </button>
-  <div class="video-wrapper">
-    <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
-  </div>
-  <div class="skip-button">
-    <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
-    <div class="progress-bar"></div>
-  </div>
-  <div class="status-box"></div>
-`;
+      <button onclick="toggleVideo(${i}, this)">
+        <img src="${vid.thumbnail}" alt="${vid.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">
+        <span>${vid.title}</span>
+      </button>
+      <div class="video-wrapper">
+        <div class="overlay-click" onclick="openAdWindow()"></div>
+        <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
+      </div>
+      <div class="skip-button">
+        <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
+        <div class="progress-bar"></div>
+      </div>
+      <div class="status-box"></div>
+    `;
     container.appendChild(card);
   });
 }
@@ -212,15 +235,20 @@ function toggleVideo(index, btn) {
   iframe.style.display = "block";
   wrapper.style.display = "block";
 
-  const adsActive = areAdsEnabled();
-
-  if (adsActive) {
+  if (areAdsEnabled()) {
     skipDiv.style.display = "block";
     statusDiv.style.display = "none";
   } else {
     skipDiv.style.display = "none";
     statusDiv.innerHTML = "✅ Ads skipped (active)";
     statusDiv.style.display = "block";
+  }
+}
+
+function openAdWindow() {
+  if (areAdsEnabled()) {
+    const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
+    window.open(adUrl, "_blank");
   }
 }
 
@@ -277,23 +305,14 @@ function hideAllAds() {
   document.querySelectorAll('.banner-ad-top, .banner-ad-bottom').forEach(el => el.style.display = 'none');
 }
 
-let lastAdClickTime = 0;
-const adCooldown = 10 * 1000;
-
-document.body.addEventListener("click", () => {
-  if (!areAdsEnabled()) return;
-  const now = Date.now();
-  if (now - lastAdClickTime >= adCooldown) {
-    lastAdClickTime = now;
-    const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
-    window.open(adUrl, "_blank");
-  }
-});
-
 document.addEventListener("mousemove", e => {
   const cursor = document.getElementById("cursor");
   cursor.style.left = e.clientX + "px";
   cursor.style.top = e.clientY + "px";
+});
+
+document.body.addEventListener("click", () => {
+  openAdWindow();
 });
 
 window.onload = () => {
@@ -301,5 +320,6 @@ window.onload = () => {
   if (!areAdsEnabled()) hideAllAds();
 };
 </script>
+
 </body>
 </html>
