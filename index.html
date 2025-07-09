@@ -132,21 +132,22 @@
   <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
   <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
 </div>
-<div class="banner-ad-bottom">
-  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
-</div>
 
 <div class="header">HiStream</div>
+
 <div class="container">
   <div class="guide">
-    🎥 Ads will be open on new tab - see them and come back<br>
-    🚀 Click anywhere → stay 20s on ad page → All ads off for 30 min.<br>
-    ❌ Leave early = no skip.<br>
-    Follow on TikTok, Insta, and Facebook & comment your fav shows!
+    🎥 Ads open in new tab - wait 20s and return<br>
+    🚀 Click anywhere → stay 20s → All ads off for 30 min.<br>
+    ❌ Leave early = no skip.
   </div>
   <input type="text" class="search-bar" placeholder="Search videos..." oninput="filterVideos(this.value)">
   <div id="videoList"></div>
+</div>
+
+<div class="banner-ad-bottom">
+  <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
 </div>
 
 <script>
@@ -157,21 +158,24 @@ const directAdUrls = [
 
 const videos = [
   {
-    title: "Squid game Season 3 hindi",
+    title: "Squid Game Season 3 Hindi",
     embedDirect: "https://drive.google.com/file/d/13PksoZkAgs2SB45wfBB2TlNjgV1EfgOf/preview",
     thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZaxWSjOe5KHTAle5vvi15jQb1JFZNdZFsIA&s"
   },
   {
-    title: "Ballerina Hindi dub",
+    title: "Ballerina Hindi Dub",
     embedDirect: "https://drive.google.com/file/d/1UpdH0p1LmevhWtyxCsFMXrKpFZJVDaCz/preview",
     thumbnail: "https://lh5.googleusercontent.com/proxy/HvpFxh1xSvI7_9iIRdwUMs-t6-7xLdUwPWNBVp4p8cLRH0eZbIm6k3LQQb9j1HRs2VU8kmOgA2ER1tGv4klIkM1fYWXNRMIOCECaFQ"
   },
   {
-    title: "The family star Hindi",
+    title: "The Family Star Hindi",
     embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
     thumbnail: "https://upload.wikimedia.org/wikipedia/en/1/1d/Family_Star_Poster.png"
   }
 ];
+
+let lastAdClick = 0;
+const adCooldown = 5000;
 
 function renderVideos(list = videos) {
   const container = document.getElementById("videoList");
@@ -180,19 +184,19 @@ function renderVideos(list = videos) {
     const card = document.createElement("div");
     card.className = "link-card";
     card.innerHTML = `
-  <button onclick="toggleVideo(${i}, this)">
-    <img src="${vid.thumbnail}" alt="${vid.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">
-    <span>${vid.title}</span>
-  </button>
-  <div class="video-wrapper">
-    <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
-  </div>
-  <div class="skip-button">
-    <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
-    <div class="progress-bar"></div>
-  </div>
-  <div class="status-box"></div>
-`;
+      <button onclick="toggleVideo(${i}, this)">
+        <img src="${vid.thumbnail}" style="width:40px;height:40px;object-fit:cover;border-radius:5px;">
+        ${vid.title}
+      </button>
+      <div class="video-wrapper">
+        <iframe class="video-frame" allowfullscreen data-src="${vid.embedDirect}"></iframe>
+      </div>
+      <div class="skip-button">
+        <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
+        <div class="progress-bar"></div>
+      </div>
+      <div class="status-box"></div>
+    `;
     container.appendChild(card);
   });
 }
@@ -205,28 +209,37 @@ function toggleVideo(index, btn) {
   const statusDiv = card.querySelector(".status-box");
 
   document.querySelectorAll(".video-wrapper, .skip-button, .status-box").forEach(el => el.style.display = "none");
-  document.querySelectorAll("iframe.video-frame").forEach(f => f.style.display = "none");
 
   if (!iframe.src) iframe.src = iframe.dataset.src;
-  iframe.style.display = "block";
   wrapper.style.display = "block";
+  iframe.style.display = "block";
 
-  const adsActive = areAdsEnabled();
-
-  if (adsActive) {
+  if (areAdsEnabled()) {
     skipDiv.style.display = "block";
-    statusDiv.style.display = "none";
+    triggerAd();
   } else {
     skipDiv.style.display = "none";
     statusDiv.innerHTML = "✅ Ads skipped (active)";
     statusDiv.style.display = "block";
   }
+
+  iframe.addEventListener("play", triggerAd);
+  iframe.addEventListener("fullscreenchange", triggerAd);
+}
+
+function triggerAd() {
+  if (!areAdsEnabled()) return;
+  const now = Date.now();
+  if (now - lastAdClick >= adCooldown) {
+    lastAdClick = now;
+    const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
+    window.open(adUrl, "_blank");
+  }
 }
 
 function areAdsEnabled() {
-  const now = Date.now();
-  const lastSkip = localStorage.getItem("skipAdUntil");
-  return !lastSkip || now > parseInt(lastSkip);
+  const skipTime = localStorage.getItem("skipAdUntil");
+  return !skipTime || Date.now() > parseInt(skipTime);
 }
 
 function startSkipProcess(btn) {
@@ -244,7 +257,7 @@ function startSkipProcess(btn) {
   let elapsed = 0;
   const timer = setInterval(() => {
     elapsed++;
-    progressBar.style.width = (elapsed * 5) + "%";
+    progressBar.style.width = `${elapsed * 5}%`;
     if (elapsed >= 20) {
       clearInterval(timer);
       localStorage.setItem("skipAdUntil", Date.now() + 30 * 60 * 1000);
@@ -259,8 +272,8 @@ function startSkipProcess(btn) {
       clearInterval(checker);
       if (elapsed < 20) {
         clearInterval(timer);
-        statusDiv.innerHTML = "❌ You returned early. Try again.";
         progressBar.style.width = "0%";
+        statusDiv.innerHTML = "❌ You returned early. Try again.";
       }
     }
   }, 500);
@@ -276,21 +289,10 @@ function hideAllAds() {
   document.querySelectorAll('.banner-ad-top, .banner-ad-bottom').forEach(el => el.style.display = 'none');
 }
 
-let lastAdClickTime = 0;
-const adCooldown = 5000;
+document.body.addEventListener("click", () => {
+  if (areAdsEnabled()) triggerAd();
+});
 
-function handleAdClick() {
-  if (!areAdsEnabled()) return;
-  const now = Date.now();
-  if (now - lastAdClickTime >= adCooldown) {
-    lastAdClickTime = now;
-    const adUrl = directAdUrls[Math.floor(Math.random() * directAdUrls.length)];
-    window.open(adUrl, "_blank");
-  }
-}
-
-document.body.addEventListener("click", handleAdClick);
-document.querySelectorAll("iframe").forEach(el => el.addEventListener("click", handleAdClick));
 document.addEventListener("mousemove", e => {
   const cursor = document.getElementById("cursor");
   cursor.style.left = e.clientX + "px";
@@ -302,6 +304,5 @@ window.onload = () => {
   if (!areAdsEnabled()) hideAllAds();
 };
 </script>
-
 </body>
 </html>
