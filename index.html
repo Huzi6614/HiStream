@@ -275,7 +275,7 @@ let lastAdClickTime = 0;
 const adCooldown = 10 * 1000;
 
 document.body.addEventListener("click", () => {
-  if (!areAdsEnabled()) return; // 🚫 Block direct ad click if ads skipped
+  if (!areAdsEnabled()) return;
   const now = Date.now();
   if (now - lastAdClickTime >= adCooldown) {
     lastAdClickTime = now;
@@ -292,8 +292,6 @@ document.addEventListener("mousemove", e => {
 
 window.onload = () => {
   renderVideos();
-
-  // 🔁 On reload, check if ads are disabled and hide banners
   if (!areAdsEnabled()) hideAllAds();
 };
 </script>
