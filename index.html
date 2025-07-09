@@ -121,6 +121,12 @@
       text-align: center;
       margin: 10px auto;
     }
+   .link-card button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
   </style>
 </head>
 <body>
@@ -157,17 +163,17 @@ const videos = [
   {
     title: "Squid game Season 3 hindi",
     embedDirect: "https://drive.google.com/file/d/13PksoZkAgs2SB45wfBB2TlNjgV1EfgOf/preview",
-    thumbnail: ""
+    thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZaxWSjOe5KHTAle5vvi15jQb1JFZNdZFsIA&s"
   },
   {
     title: "Ballerina Hindi dub",
     embedDirect: "https://drive.google.com/file/d/1UpdH0p1LmevhWtyxCsFMXrKpFZJVDaCz/preview",
-    thumbnail: ""
+    thumbnail: "https://lh5.googleusercontent.com/proxy/HvpFxh1xSvI7_9iIRdwUMs-t6-7xLdUwPWNBVp4p8cLRH0eZbIm6k3LQQb9j1HRs2VU8kmOgA2ER1tGv4klIkM1fYWXNRMIOCECaFQ"
   },
   {
     title: "The family star Hindi",
     embedDirect: "https://drive.google.com/file/d/18ecN-mj5L8PXq2JfbhH1DAcMmx1yy5EO/preview",
-    thumbnail: ""
+    thumbnail: "https://upload.wikimedia.org/wikipedia/en/1/1d/Family_Star_Poster.png"
   }
 ];
 
@@ -178,16 +184,19 @@ function renderVideos(list = videos) {
     const card = document.createElement("div");
     card.className = "link-card";
     card.innerHTML = `
-      <button onclick="toggleVideo(${i}, this)">▶️ ${vid.title}</button>
-      <div class="video-wrapper">
-        <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
-      </div>
-      <div class="skip-button">
-        <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
-        <div class="progress-bar"></div>
-      </div>
-      <div class="status-box"></div>
-    `;
+  <button onclick="toggleVideo(${i}, this)">
+    <img src="${vid.thumbnail}" alt="${vid.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; margin-right: 10px; vertical-align: middle;">
+    <span style="vertical-align: middle;">▶️ ${vid.title}</span>
+  </button>
+  <div class="video-wrapper">
+    <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
+  </div>
+  <div class="skip-button">
+    <button onclick="startSkipProcess(this)">🚀 Skip Ads</button>
+    <div class="progress-bar"></div>
+  </div>
+  <div class="status-box"></div>
+`;
     container.appendChild(card);
   });
 }
