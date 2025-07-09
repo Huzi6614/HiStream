@@ -316,5 +316,24 @@ window.onload = () => {
   if (!areAdsEnabled()) hideAllAds();
 };
 </script>
+  <script>
+  function toggleSocialBar(show) {
+    const script = document.getElementById("social-bar-script");
+    if (script) script.style.display = show ? "block" : "none";
+  }
+  window.addEventListener("load", () => {
+    const isAdEnabled = !localStorage.getItem("skipAdUntil") || Date.now() > parseInt(localStorage.getItem("skipAdUntil"));
+    if (isAdEnabled) {
+      const s = document.createElement('script');
+      s.src = "//pl27105537.profitableratecpm.com/95/c8/c7/95c8c70bc6a8eec8e0ff1483b690c97c.js";
+      s.type = "text/javascript";
+      s.id = "social-bar-script";
+      document.body.appendChild(s);
+    }
+  });
+</script>
+</body>
+</html>
+
 </body>
 </html>
