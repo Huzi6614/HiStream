@@ -316,10 +316,10 @@ window.onload = () => {
   if (!areAdsEnabled()) hideAllAds();
 };
 </script>
-  <script>
-  function toggleSocialBar(show) {
-    const script = document.getElementById("social-bar-script");
-    if (script) script.style.display = show ? "block" : "none";
+<script>
+ function toggleSocialBar(show) {
+   const script = document.getElementById("social-bar-script");  
+   if (script) script.style.display = show ? "block" : "none";
   }
   window.addEventListener("load", () => {
     const isAdEnabled = !localStorage.getItem("skipAdUntil") || Date.now() > parseInt(localStorage.getItem("skipAdUntil"));
@@ -329,11 +329,8 @@ window.onload = () => {
       s.type = "text/javascript";
       s.id = "social-bar-script";
       document.body.appendChild(s);
-    }
+ }
   });
 </script>
-</body>
-</html>
-
 </body>
 </html>
