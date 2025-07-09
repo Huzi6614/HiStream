@@ -5,7 +5,6 @@
   <title>HiStream</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Your original CSS — unchanged */
     body {
       background: #0f0f0f;
       color: #00ffe7;
@@ -69,6 +68,9 @@
       transition: 0.2s;
       width: 100%;
       text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .link-card button:hover {
       background: #ff0080;
@@ -121,12 +123,6 @@
       text-align: center;
       margin: 10px auto;
     }
-   .link-card button {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
   </style>
 </head>
 <body>
@@ -134,11 +130,12 @@
 
 <div class="banner-ad-top">
   <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-top"></div>
 </div>
+
 <div class="banner-ad-bottom">
   <script async data-cfasync="false" src="//pl27092940.profitableratecpm.com/7e6714a3cc476d1dce5ef542c4ddc374/invoke.js"></script>
-  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374"></div>
+  <div id="container-7e6714a3cc476d1dce5ef542c4ddc374-bottom"></div>
 </div>
 
 <div class="header">HiStream</div>
@@ -185,8 +182,8 @@ function renderVideos(list = videos) {
     card.className = "link-card";
     card.innerHTML = `
   <button onclick="toggleVideo(${i}, this)">
-    <img src="${vid.thumbnail}" alt="${vid.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px; margin-right: 10px; vertical-align: middle;">
-    <span style="vertical-align: middle;">▶️ ${vid.title}</span>
+    <img src="${vid.thumbnail}" alt="${vid.title}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">
+    <span>${vid.title}</span>
   </button>
   <div class="video-wrapper">
     <iframe class="video-frame" data-src="${vid.embedDirect}" allowfullscreen></iframe>
@@ -254,7 +251,7 @@ function startSkipProcess(btn) {
       localStorage.setItem("skipAdUntil", Date.now() + 30 * 60 * 1000);
       statusDiv.innerHTML = "✅ Ads skipped for 30 minutes!";
       skipDiv.style.display = "none";
-      hideAllAds(); // 🚫 Hide banners
+      hideAllAds();
     }
   }, 1000);
 
@@ -304,6 +301,5 @@ window.onload = () => {
   if (!areAdsEnabled()) hideAllAds();
 };
 </script>
-
 </body>
 </html>
