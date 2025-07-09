@@ -222,9 +222,6 @@ function toggleVideo(index, btn) {
     statusDiv.innerHTML = "✅ Ads skipped (active)";
     statusDiv.style.display = "block";
   }
-
-  iframe.addEventListener("play", triggerAd);
-  iframe.addEventListener("fullscreenchange", triggerAd);
 }
 
 function triggerAd() {
@@ -289,9 +286,24 @@ function hideAllAds() {
   document.querySelectorAll('.banner-ad-top, .banner-ad-bottom').forEach(el => el.style.display = 'none');
 }
 
-document.body.addEventListener("click", () => {
+function handleGlobalTrigger() {
   if (areAdsEnabled()) triggerAd();
-});
+}
+
+document.addEventListener("click", handleGlobalTrigger);
+document.addEventListener("touchstart", handleGlobalTrigger);
+document.addEventListener("fullscreenchange", handleGlobalTrigger);
+
+setInterval(() => {
+  const iframes = document.querySelectorAll("iframe");
+  iframes.forEach(iframe => {
+    try {
+      if (document.activeElement === iframe) {
+        handleGlobalTrigger();
+      }
+    } catch (err) {}
+  });
+}, 1000);
 
 document.addEventListener("mousemove", e => {
   const cursor = document.getElementById("cursor");
